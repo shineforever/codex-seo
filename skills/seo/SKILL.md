@@ -20,6 +20,13 @@ the codex-seo root: the repository root when working inside a clone
 hub skill directory after `install.sh` runs; the installer rewrites the
 canonical form to `"$HOME/.agents/skills/seo/scripts/codex-seo"`. Never
 invoke bundled scripts with a bare Python interpreter.
+invoke bundled scripts with a bare Python interpreter.
+
+**Fetching policy:** Always fetch the audited site through the bundled
+launcher scripts above (raw HTML, response headers, redirect chains) or the
+session's browser. Do not route target-site fetching through other
+web-reading skills or reader proxies: SEO audits need raw HTML and headers,
+and extracted-text readers drop both.
 
 Comprehensive SEO analysis across all industries (SaaS, local services,
 e-commerce, publishers, agencies). Orchestrates 25 sub-skills (22 core + 1 framework
