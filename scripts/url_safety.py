@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Canonical URL safety module for claude-seo.
+Canonical URL safety module for codex-seo.
 
 Centralizes SSRF protection, DNS rebinding mitigation, and DNS-pinned HTTP
 fetching. Every script in this repository that accepts a user-supplied URL
@@ -48,7 +48,7 @@ URLSafetyError
 
 Local targets
 =============
-``CLAUDE_SEO_LOCAL_TARGETS`` is an opt-in, comma-separated allowlist of
+``CODEX_SEO_LOCAL_TARGETS`` is an opt-in, comma-separated allowlist of
 ``host`` or ``host:port`` entries (for example
 ``localhost:3000,127.0.0.1:8080,100.101.102.103``) that lets an operator
 audit a dev server, a staging host, or a machine reached over Tailscale.
@@ -63,7 +63,7 @@ Threading
 The DNS pinning helper is a critical section guarded by a non-blocking
 ``threading.Lock``. Two concurrent pinned fetches on the same process will
 raise rather than corrupt the global ``socket.getaddrinfo`` reference.
-claude-seo scripts are intentionally single-threaded; parallelism is
+codex-seo scripts are intentionally single-threaded; parallelism is
 delegated to the agent-process layer.
 
 Limitations
@@ -178,7 +178,7 @@ def _reject_authority_confusion(url: str, parsed) -> None:
 
     Backslashes, userinfo, and fragment/userinfo ambiguity have all been
     used to make one parser see a public host while another connects to a
-    private host. claude-seo never needs credentials in audit URLs, so
+    private host. codex-seo never needs credentials in audit URLs, so
     userinfo is refused outright.
     """
     authority = _raw_authority(url)
@@ -228,11 +228,11 @@ def is_safe_ip(ip_str: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# CLAUDE_SEO_LOCAL_TARGETS: an explicit, top-level-only allowlist
+# CODEX_SEO_LOCAL_TARGETS: an explicit, top-level-only allowlist
 # ---------------------------------------------------------------------------
 #
 # Auditing a site before it is deployed, or a staging host reached over
-# Tailscale, means pointing claude-seo at a non-public address. The default
+# Tailscale, means pointing codex-seo at a non-public address. The default
 # policy refuses that, correctly: this toolkit follows URLs found on pages it
 # crawls, so a blanket "allow private" switch is an SSRF hole with a friendly
 # name.
@@ -251,7 +251,7 @@ def is_safe_ip(ip_str: str) -> bool:
 #     link-local, 100.100.100.200 sits inside the Tailscale range this
 #     allowlist exists to permit, and fd00:ec2::254 is unique-local rather
 #     than link-local, so no single address predicate catches all three.
-_LOCAL_TARGETS_ENV = "CLAUDE_SEO_LOCAL_TARGETS"
+_LOCAL_TARGETS_ENV = "CODEX_SEO_LOCAL_TARGETS"
 
 
 # Hostnames and literals no allowlist entry can ever unblock.
@@ -326,7 +326,7 @@ def _parse_local_target(entry: str) -> Optional[tuple[str, Optional[int]]]:
 
 
 def _local_targets() -> tuple[tuple[str, Optional[int]], ...]:
-    """The parsed contents of ``CLAUDE_SEO_LOCAL_TARGETS``.
+    """The parsed contents of ``CODEX_SEO_LOCAL_TARGETS``.
 
     Read on every call rather than cached: the variable is operator
     configuration, and a cached empty tuple from import time would make the
@@ -340,7 +340,7 @@ def _local_targets() -> tuple[tuple[str, Optional[int]], ...]:
 
 
 def _is_allowlisted_local_target(hostname: str, port: Optional[int]) -> bool:
-    """True when ``hostname``/``port`` is named in ``CLAUDE_SEO_LOCAL_TARGETS``.
+    """True when ``hostname``/``port`` is named in ``CODEX_SEO_LOCAL_TARGETS``.
 
     ``hostname`` must already be normalized. Metadata endpoints are refused
     before the list is even read.
@@ -490,7 +490,7 @@ def validate_url_strict(url: str) -> tuple[str, str]:
     if port is None:
         raise URLSafetyError(f"Invalid port in URL authority: {url!r}")
 
-    # The CLAUDE_SEO_LOCAL_TARGETS allowlist is read here and nowhere the
+    # The CODEX_SEO_LOCAL_TARGETS allowlist is read here and nowhere the
     # request chain can reach later, which is what keeps it top-level only.
     allowlisted = _is_allowlisted_local_target(hostname, port)
     if hostname in _BLOCKED_HOSTNAMES and not allowlisted:
@@ -527,7 +527,7 @@ def validate_url_strict(url: str) -> tuple[str, str]:
         if is_safe_ip(ip_str):
             continue
         if allowlisted and _is_allowlistable_ip(ip_str):
-            continue  # Named in CLAUDE_SEO_LOCAL_TARGETS; see that block.
+            continue  # Named in CODEX_SEO_LOCAL_TARGETS; see that block.
         raise URLSafetyError(
             f"DNS rebinding refused: {hostname} resolves to "
             f"non-public IP {ip_str}"
@@ -639,7 +639,7 @@ def _validated_proxy_hosts(url: str, proxies: Optional[dict] = None) -> frozense
 
 
 # A single non-blocking lock guards the global getaddrinfo monkey-patch.
-# This is a deliberate choice: claude-seo scripts run one URL fetch at a
+# This is a deliberate choice: codex-seo scripts run one URL fetch at a
 # time, and we'd rather raise loudly than silently corrupt resolver state
 # if a caller ever introduces threading.
 _dns_patch_lock = threading.Lock()
@@ -681,7 +681,7 @@ def _pin_dns(
     if not _dns_patch_lock.acquire(blocking=False):
         raise URLSafetyError(
             "DNS-pinned fetch already in progress on another thread; "
-            "claude-seo url_safety is not thread-safe by design."
+            "codex-seo url_safety is not thread-safe by design."
         )
 
     original_getaddrinfo = socket.getaddrinfo
@@ -751,13 +751,13 @@ def _pin_dns(
         _dns_patch_lock.release()
 
 
-# The browser-like default User-Agent for every raw-HTTP fetch in claude-seo.
+# The browser-like default User-Agent for every raw-HTTP fetch in codex-seo.
 # ``fetch_page.py`` has carried these defaults since v1.2.1 (issue #9); they
 # live here now because ``url_safety`` is the lower layer, so this module is
 # the one place to change them. ``fetch_page.py`` imports them back.
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/150.0.7871.114 Safari/537.36 ClaudeSEO/2.0"
+    "(KHTML, like Gecko) Chrome/150.0.7871.114 Safari/537.36 CodexSEO/2.0"
 )
 
 # Without these, ``requests`` announces itself as
@@ -1144,7 +1144,7 @@ def _cli() -> None:
     import sys
 
     parser = argparse.ArgumentParser(
-        description="Validate a URL against claude-seo's SSRF policy."
+        description="Validate a URL against codex-seo's SSRF policy."
     )
     parser.add_argument("url", help="URL to validate")
     parser.add_argument(

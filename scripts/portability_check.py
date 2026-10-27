@@ -2,7 +2,7 @@
 """
 Cross-platform portability lint for SKILL.md files.
 
-claude-seo skills run under Claude Code, but also Cursor / Cursor Cloud
+codex-seo skills run under Codex CLI, but also Cursor / Cursor Cloud
 Agents / Google Antigravity / Gemini CLI / OpenAI Codex CLI / Cline /
 Aider. Most harnesses share a minimum frontmatter contract:
 
@@ -12,7 +12,7 @@ Aider. Most harnesses share a minimum frontmatter contract:
 Claude-Code-specific fields are tolerated by other harnesses (they are
 ignored, not rejected):
 
-  - ``model``        (e.g. sonnet, haiku, opus)
+  - ``model``        (e.g. default, gpt-5.1-codex)
   - ``maxTurns``     (int)
   - ``tools``        (comma-separated list with optional inline comments)
   - ``compatibility`` (free text, e.g. "Requires the @ahrefs/mcp MCP server")
@@ -159,7 +159,7 @@ def check_one(path: Path) -> list[dict]:
         })
 
     # tools is optional. If present, Cline and Codex parse the list more
-    # strictly than Claude Code: warn if there are inline comments
+    # strictly than Codex CLI: warn if there are inline comments
     # (e.g., "Read, Bash # for analyse").
     tools = frontmatter.get("tools", "")
     if tools and "#" in tools:
@@ -178,7 +178,7 @@ def check_one(path: Path) -> list[dict]:
                 "severity": "info", "path": relpath,
                 "rule": "metadata-without-version",
                 "message": "metadata block present but no version field; "
-                           "claude-seo's manifest test expects "
+                           "codex-seo's manifest test expects "
                            "metadata.version on every skill",
             })
 
@@ -187,7 +187,7 @@ def check_one(path: Path) -> list[dict]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Cross-platform portability lint for claude-seo SKILL.md files."
+        description="Cross-platform portability lint for codex-seo SKILL.md files."
     )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--strict", action="store_true",

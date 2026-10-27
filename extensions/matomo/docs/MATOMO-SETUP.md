@@ -4,8 +4,8 @@
 
 1. **Matomo Reporting API** for organic traffic, landing pages, devices,
    countries, referrers, and search keywords via
-   `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run matomo_report.py`.
-2. **Live credential probe** via `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run matomo_auth.py --check`
+   `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py`.
+2. **Live credential probe** via `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_auth.py --check`
    used by the `/seo matomo` skill and by the audit orchestrator to
    decide whether to spawn the `seo-matomo` agent.
 3. A unified `seo-matomo` skill that routes the right command at the
@@ -26,11 +26,11 @@ You'll be prompted for:
 - Default `idSite` (optional, e.g. `1`); saves having to pass
   `--site-id` on every call
 
-The installer writes them to `~/.config/claude-seo/matomo.json` with `0600`
+The installer writes them to `~/.config/codex-seo/matomo.json` with `0600`
 permissions, atomically (temp file plus rename, so a crash never leaves a
 half-written or truncated credential file). This is the same location and the
 same guarded write pattern the `backlinks_auth` module uses for the Moz and
-Bing keys. The token is deliberately kept out of `~/.claude/settings.json`,
+Bing keys. The token is deliberately kept out of `~/.codex/settings.json`,
 which is a general-purpose config file that tooling reads, prints, and syncs.
 
 Environment variables still take precedence for any field the file does not
@@ -47,14 +47,14 @@ export MATOMO_SITE_ID="1"
 1. Log in to your Matomo instance as a Super User or Admin
 2. Go to **Administration -> Personal -> Security -> API Tokens**
 3. Click **Create a new token**, give it a meaningful name
-   (e.g. "claude-seo") and `view` access on the sites you want to
+   (e.g. "codex-seo") and `view` access on the sites you want to
    analyze
 4. Copy the generated `token_auth` (32 hex chars). Matomo only shows
    it once at creation
 
 ## Self-hosted instance on a private address
 
-Every request to your Matomo instance goes through claude-seo's shared SSRF
+Every request to your Matomo instance goes through codex-seo's shared SSRF
 guard, the `url_safety` module: the instance URL is validated, its hostname is
 pinned to the validated address for the life of the request, and a redirect
 away from the instance is refused rather than followed.
@@ -62,17 +62,17 @@ away from the instance is refused rather than followed.
 That guard refuses private, loopback, and link-local addresses by default, so
 an instance at `http://matomo.internal:8080`, `http://192.168.1.20`, or
 `http://localhost:8080` is refused until you say it is yours. Name it in the
-`CLAUDE_SEO_LOCAL_TARGETS` allowlist:
+`CODEX_SEO_LOCAL_TARGETS` allowlist:
 
 ```bash
-export CLAUDE_SEO_LOCAL_TARGETS="matomo.internal:8080"
+export CODEX_SEO_LOCAL_TARGETS="matomo.internal:8080"
 ```
 
 Entries are `host` or `host:port`, comma-separated, matched exactly. A bare
 `host` matches any port on that host; `host:port` matches that port only.
 There is no wildcard, no range, and no "allow private" mode. To make it
 permanent, put the export in your shell profile or the `env` block of
-`~/.claude/settings.json`.
+`~/.codex/settings.json`.
 
 The allowlist is deliberately narrow, and the narrowness is the point:
 
@@ -81,7 +81,7 @@ The allowlist is deliberately narrow, and the narrowness is the point:
   cannot use the allowlist to reach the rest of your network.
 - Cloud metadata endpoints (169.254.169.254, `metadata.google.internal`,
   100.100.100.200, and their siblings) are refused even when listed.
-- Unset, claude-seo behaves exactly as it does without the feature.
+- Unset, codex-seo behaves exactly as it does without the feature.
 
 `extensions/matomo/install.sh` and `install.ps1` detect a private instance
 address at install time and print the exact line to add.
@@ -95,9 +95,9 @@ will fail with `SSLError` on untrusted certificates.
 ## Verify
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run matomo_auth.py --check
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run matomo_report.py check --json
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run matomo_report.py organic --json
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_auth.py --check
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py check --json
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py organic --json
 ```
 
 `--check` runs `API.getMatomoVersion` against your instance and reports
@@ -121,17 +121,16 @@ have both GA4 and Matomo configured.
 ```
 
 This removes the skill, the agent, and
-`~/.config/claude-seo/matomo.json`, and clears any `MATOMO_*` entries a
-pre-v2.4.0 installer had left in `~/.claude/settings.json`.
+`~/.config/codex-seo/matomo.json`, and clears any `MATOMO_*` entries a
+pre-v2.4.0 installer had left in `~/.codex/settings.json`.
 
 PowerShell manual removal:
 
 ```powershell
-Remove-Item -Recurse -Force "$HOME\.claude\skills\seo-matomo"
-Remove-Item -Force "$HOME\.claude\agents\seo-matomo.md"
-Remove-Item -Force "$HOME\.config\claude-seo\matomo.json"
+Remove-Item -Recurse -Force "$HOME\.agents\skills\seo-matomo"
+Remove-Item -Force "$HOME\.agents\skills\seo\agents\seo-matomo.md"
+Remove-Item -Force "$HOME\.config\codex-seo\matomo.json"
 ```
 
-If you installed a pre-v2.4.0 build, also open `~/.claude/settings.json` and
-remove `MATOMO_URL`, `MATOMO_API_TOKEN`, and `MATOMO_SITE_ID` from the
-top-level `env` object.
+If you installed a pre-v2.4.0 build, also open `~/.config/codex-seo/env.json`
+and remove `MATOMO_URL`, `MATOMO_API_TOKEN`, and `MATOMO_SITE_ID`.

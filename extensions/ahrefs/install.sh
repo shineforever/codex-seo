@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# Claude SEO: Ahrefs extension installer.
+# Codex SEO: Ahrefs extension installer.
 #
-# Wires the official @ahrefs/mcp server into ~/.claude.json and
-# copies the seo-ahrefs mirror skill into ~/.claude/skills/.
+# Wires the official @ahrefs/mcp server into ~/.codex/config.toml and
+# copies the seo-ahrefs mirror skill into ~/.agents/skills/.
 #
 # Prereq: an Ahrefs API token. Get one at https://ahrefs.com/api.
 set -euo pipefail
 
 main() {
-    SKILL_DIR="${HOME}/.claude/skills"
-    # MCP servers live in ~/.claude.json (the file `claude mcp add` writes).
-    # NOT ~/.claude/settings.json - `mcpServers` is not a key Claude Code reads
+    SKILL_DIR="${HOME}/.agents/skills"
+    # MCP servers live in ~/.codex/config.toml (the file `codex mcp add` writes).
+    # NOT ~/.codex/settings.json - `mcpServers` is not a key Codex CLI reads
     # there, so entries written to settings.json silently never load.
-    MCP_CONFIG_JSON="${HOME}/.claude.json"
+    MCP_CONFIG_JSON="${HOME}/.codex/config.toml"
 
     echo "════════════════════════════════════════"
-    echo "║   Claude SEO: Ahrefs extension       ║"
+    echo "║   Codex SEO: Ahrefs extension       ║"
     echo "════════════════════════════════════════"
 
     command -v python3 >/dev/null 2>&1 || {
@@ -26,8 +26,8 @@ main() {
     }
 
     if [ ! -d "${SKILL_DIR}/seo" ]; then
-        echo "✗ claude-seo base plugin not installed."
-        echo "  Install it first: curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash"
+        echo "✗ codex-seo base plugin not installed."
+        echo "  Install it first: curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh | bash"
         exit 1
     fi
 
@@ -49,45 +49,21 @@ main() {
     cp "${SOURCE_DIR}/skills/seo-ahrefs/SKILL.md" "${SKILL_DIR}/seo-ahrefs/SKILL.md"
     echo "✓ Installed skill: ${SKILL_DIR}/seo-ahrefs/SKILL.md"
 
-    # Merge MCP config into ~/.claude.json atomically.
+    # Merge MCP config into ~/.codex/config.toml atomically.
     mkdir -p "$(dirname "${MCP_CONFIG_JSON}")"
-    CLAUDE_SEO_SECRET="${AHREFS_TOKEN}" python3 - "${MCP_CONFIG_JSON}" <<'PY'
-import json
-import os
-import sys
-import tempfile
-
-# The token arrives in the environment, not argv: argv is visible to other
-# local users through ps, the environment is not.
-path, token = sys.argv[1], os.environ["CLAUDE_SEO_SECRET"]
-data = {}
-if os.path.exists(path):
-    try:
-        with open(path) as fh:
-            data = json.load(fh)
-    except json.JSONDecodeError:
-        sys.exit(f"✗ {path} is not valid JSON. Nothing was changed; fix it and rerun.")
-data.setdefault("mcpServers", {})["ahrefs"] = {
-    "command": "npx",
-    "args": ["--yes", "--package=@ahrefs/mcp@0.0.11", "mcp"],
-    "env": {"AHREFS_API_TOKEN": token},
-}
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path) or ".",
-                          prefix=".settings.", suffix=".json")
-try:
-    with os.fdopen(fd, "w") as fh:
-        json.dump(data, fh, indent=2)
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, path)
-except Exception:
-    if os.path.exists(tmp):
-        os.unlink(tmp)
-    raise
-print(f"✓ Wrote mcpServers.ahrefs to {path}")
-PY
+    HELPER="${SEO_SKILL_DIR:-${SKILL_DIR}/seo}/scripts/codex_config.py"
+    [ -f "${HELPER}" ] || HELPER="${SOURCE_DIR}/../../scripts/codex_config.py"
+    AHREFS_API_TOKEN="${AHREFS_TOKEN}" \
+    python3 "${HELPER}" add ahrefs --command npx \
+        --arg=--yes --arg '--package=@ahrefs/mcp@0.0.11' --arg mcp \
+        --env-pass AHREFS_API_TOKEN \
+        --config-path "${MCP_CONFIG_JSON}" || {
+        echo "  ⚠  Could not auto-configure MCP server."
+        echo "  Add the ahrefs server manually to ${MCP_CONFIG_JSON}"
+    }
 
     echo
-    echo "Done. Open a new Claude Code session and run:"
+    echo "Done. Open a new Codex CLI session and run:"
     echo "  /seo ahrefs metrics https://example.com"
     echo
     echo "Full docs: extensions/ahrefs/docs/AHREFS-SETUP.md"

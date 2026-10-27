@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Cross-platform runtime for Claude SEO's bundled Python scripts.
+"""Cross-platform runtime for Codex SEO's bundled Python scripts.
 
 This module deliberately uses only the Python standard library. It is launched
-by the sibling ``scripts/claude-seo`` launcher under a base Python, then
+by the sibling ``scripts/codex-seo`` launcher under a base Python, then
 dispatches work through the managed virtual environment created by ``setup``.
-Skills, agents, and hooks invoke that launcher as
-``"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo"``; the repository keeps no
+Skills and agents invoke that launcher as
+``"${CODEX_SEO_ROOT}/scripts/codex-seo"``; the repository keeps no
 top-level ``bin/`` directory because hosted marketplaces reject one.
 """
 
@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any
 
 RUNTIME_SCHEMA = 1
-# Supported interpreter range. scripts/claude-seo and install.ps1 repeat these
+# Supported interpreter range. scripts/codex-seo and install.ps1 repeat these
 # bounds, and tests/test_python_range.py keeps every copy in step. 3.15 waits
 # on google-ads, whose wheels declare Python < 3.15.
 MIN_PYTHON = (3, 11)
@@ -75,13 +75,6 @@ def _root() -> Path:
 
 
 def _plugin_version(root: Path) -> str:
-    for manifest in (root / ".claude-plugin" / "plugin.json", root / "runtime-plugin.json"):
-        try:
-            value = json.loads(manifest.read_text(encoding="utf-8")).get("version")
-            if isinstance(value, str):
-                return value
-        except (OSError, ValueError):
-            pass
     metadata = root / "pyproject.toml"
     try:
         match = re.search(r'(?m)^version\s*=\s*"([^"]+)"', metadata.read_text(encoding="utf-8"))
@@ -100,12 +93,6 @@ def _requirements_hash(root: Path) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-def _is_plugin(root: Path) -> bool:
-    if os.environ.get("CLAUDE_PLUGIN_DATA") or os.environ.get("CLAUDE_PLUGIN_ROOT"):
-        return True
-    return (root / ".claude-plugin" / "plugin.json").is_file() and not (root / ".git").exists()
-
-
 def _configured_data_dir(raw: str) -> Path:
     """Resolve a configured data directory and reject destructive broad roots."""
     candidate = Path(raw).expanduser().resolve()
@@ -120,20 +107,12 @@ def _configured_data_dir(raw: str) -> Path:
 
 
 def _data_dir(root: Path) -> tuple[Path, str]:
-    override = os.environ.get("CLAUDE_SEO_DATA_DIR")
+    override = os.environ.get("CODEX_SEO_DATA_DIR")
     if override:
         return _configured_data_dir(override), "override"
-    plugin_data = os.environ.get("CLAUDE_PLUGIN_DATA")
-    if plugin_data:
-        return _configured_data_dir(plugin_data), "plugin"
-    if _is_plugin(root):
-        if sys.platform == "win32":
-            base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
-        elif sys.platform == "darwin":
-            base = Path.home() / "Library" / "Application Support"
-        else:
-            base = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
-        return (base / "claude-seo").resolve(), "plugin-fallback"
+    managed = os.environ.get("CODEX_SEO_DATA")
+    if managed:
+        return _configured_data_dir(managed), "managed"
     return root, "manual"
 
 
@@ -169,9 +148,9 @@ def _python_supported() -> bool:
 def _python_range_message() -> str:
     found = f"{sys.version_info.major}.{sys.version_info.minor}"
     return (
-        f"Claude SEO needs Python {MIN_PYTHON[0]}.{MIN_PYTHON[1]} to "
+        f"Codex SEO needs Python {MIN_PYTHON[0]}.{MIN_PYTHON[1]} to "
         f"{MAX_PYTHON[0]}.{MAX_PYTHON[1]}. Found {found} ({sys.executable}). "
-        "Install a supported Python or set CLAUDE_SEO_PYTHON."
+        "Install a supported Python or set CODEX_SEO_PYTHON."
     )
 
 
@@ -212,8 +191,29 @@ def _status(root: Path) -> dict[str, Any]:
     }
 
 
+def _persisted_env() -> dict[str, str]:
+    """Variables persisted by extension installers (~/.config/codex-seo/env.json).
+
+    Replaces the settings-level env injection other harnesses offer: installers
+    write API keys here once, and every bundled script sees them. The real
+    environment wins over persisted values, and a corrupt file is ignored
+    rather than fatal: the bundled scripts surface missing credentials
+    themselves with setup instructions.
+    """
+    path = Path.home() / ".config" / "codex-seo" / "env.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return {str(k): str(v) for k, v in data.items() if isinstance(k, str)}
+
+
 def _safe_env(status: dict[str, Any]) -> dict[str, str]:
     env = os.environ.copy()
+    for key, value in _persisted_env().items():
+        env.setdefault(key, value)
     env["PYTHONUTF8"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
     env["PLAYWRIGHT_BROWSERS_PATH"] = str(status["data_dir"] / "ms-playwright")
@@ -280,7 +280,7 @@ class SetupLock:
             except OSError:
                 age = 0
             if age <= LOCK_STALE_SECONDS:
-                raise RuntimeError("another Claude SEO setup is already running")
+                raise RuntimeError("another Codex SEO setup is already running")
             self.path.unlink(missing_ok=True)
             with self.path.open("x", encoding="utf-8") as handle:
                 handle.write(f"{os.getpid()}\n{int(time.time())}\n")
@@ -310,7 +310,7 @@ def command_setup(args: argparse.Namespace) -> int:
     had_previous = final_venv.exists()
     try:
         with SetupLock(data_dir / ".setup.lock"):
-            print("Creating isolated Claude SEO environment...", flush=True)
+            print("Creating isolated Codex SEO environment...", flush=True)
             # venv bootstraps pip itself but discards ensurepip's output, so a
             # failing bootstrap would surface only as "ensurepip returned 1".
             # Running it as its own stage keeps pip's diagnostics visible.
@@ -369,10 +369,10 @@ def command_setup(args: argparse.Namespace) -> int:
                 shutil.rmtree(final_venv, ignore_errors=True)
             if previous_moved and had_previous and backup.exists():
                 backup.replace(final_venv)
-        print(f"Claude SEO setup failed: {_redact(str(exc))}", file=sys.stderr)
+        print(f"Codex SEO setup failed: {_redact(str(exc))}", file=sys.stderr)
         return 1
     if browser_ready or args.skip_browser:
-        print("Claude SEO runtime is ready.")
+        print("Codex SEO runtime is ready.")
         return 0
     print("Core runtime is ready, but Chromium is unavailable. Run setup again to enable rendered-page features.", file=sys.stderr)
     return 10
@@ -403,11 +403,11 @@ def command_run(args: argparse.Namespace) -> int:
     try:
         script = _resolve_script(root, args.script, args.extension)
     except ValueError as exc:
-        print(f"Claude SEO runtime: {exc}", file=sys.stderr)
+        print(f"Codex SEO runtime: {exc}", file=sys.stderr)
         return 2
     status = _status(root)
     if not status["ready"]:
-        print("Claude SEO runtime is not ready. Run `/seo setup` and retry.", file=sys.stderr)
+        print("Codex SEO runtime is not ready. Run `/seo setup` and retry.", file=sys.stderr)
         return 3
     result = subprocess.run(
         [str(status["python_path"]), str(script), *args.script_args],
@@ -442,7 +442,7 @@ def command_doctor(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="claude-seo", description="Claude SEO managed Python runtime")
+    parser = argparse.ArgumentParser(prog="codex-seo", description="Codex SEO managed Python runtime")
     sub = parser.add_subparsers(dest="command", required=True)
     setup = sub.add_parser("setup", help="create or refresh the isolated runtime")
     setup.add_argument("--skip-browser", action="store_true")
@@ -464,7 +464,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return int(args.func(args))
     except (OSError, RuntimeError, ValueError) as exc:
-        print(f"Claude SEO runtime failed: {_redact(str(exc))}", file=sys.stderr)
+        print(f"Codex SEO runtime failed: {_redact(str(exc))}", file=sys.stderr)
         return 2
 
 

@@ -8,8 +8,6 @@ description: >
   whether AI agents can use or browse the site, or about llms.txt or WebMCP.
   Exclude AI citability and brand signals (seo-geo) and commerce protocol
   depth (seo-ecommerce).
-user-invocable: true
-argument-hint: "[audit|fix|lighthouse|refresh] [url]"
 license: MIT
 metadata:
   author: AgriciDaniel
@@ -43,19 +41,19 @@ only ChatGPT desktop calls tools by default).
 Run the steps in this order and keep every tool's JSON for the report.
 
 1. **Lighthouse fraction.**
-   `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run lighthouse_agentic.py <url> --strategy both --json`.
+   `"${CODEX_SEO_ROOT}/scripts/codex-seo" run lighthouse_agentic.py <url> --strategy both --json`.
    Uses PSI v5 (`category=AGENTIC_BROWSING`); a Google API key avoids the
    shared anonymous quota. With a saved report use `--from-json <file>`.
    Report the fraction as `X/N` exactly as computed. Never convert it to a
    percentage and never assume N: it is at most 6, and N/A and informative
    audits drop out. Read `references/lighthouse-agentic-category.md` before explaining it.
 2. **HTTP and markup checks.**
-   `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run agentic_check.py <url> --json`.
+   `"${CODEX_SEO_ROOT}/scripts/codex-seo" run agentic_check.py <url> --json`.
    Covers server-rendered content, robots.txt groups per AI agent and
    Content-Signal, llms.txt, Markdown delivery, ai-catalog.json, `/.well-known`
    documents, and WebMCP markup.
 3. **Accessibility tree.**
-   `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run agent_ux_check.py <url> --json`.
+   `"${CODEX_SEO_ROOT}/scripts/codex-seo" run agent_ux_check.py <url> --json`.
    A local 0-100 heuristic; present it separately from the Lighthouse fraction.
    Page-level criteria: `references/agent-friendly-pages.md`.
 4. **WAF behaviour (only with authorization).** Add `--ua-matrix` to step 2
@@ -119,10 +117,10 @@ are listed as options either way.
 Drafts go to stdout for review; nothing is deployed and no file is overwritten.
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run agentic_fix.py robots <url> --signal "search=yes, ai-input=yes, ai-train=no"
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run agentic_fix.py llms <url>
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run agentic_fix.py ai-catalog --publisher example.com --entry "Name|media type|url"
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run agentic_fix.py webmcp <url> --json
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run agentic_fix.py robots <url> --signal "search=yes, ai-input=yes, ai-train=no"
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run agentic_fix.py llms <url>
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run agentic_fix.py ai-catalog --publisher example.com --entry "Name|media type|url"
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run agentic_fix.py webmcp <url> --json
 ```
 
 - `robots` adds Content-Signal to each group and never changes Allow or
@@ -161,7 +159,7 @@ version changes, and the `CHECKED_ON` constant in `agentic_check.py` together.
   not a command.
 - Every request goes through `url_safety` (SSRF and DNS-rebinding guards). For
   a local or staging host, the operator names it in
-  `CLAUDE_SEO_LOCAL_TARGETS` (see `seo-technical`).
+  `CODEX_SEO_LOCAL_TARGETS` (see `seo-technical`).
 - Never print API keys; `lighthouse_agentic.py` reads the key from the shared
   Google config and redacts it from errors.
 
@@ -189,4 +187,4 @@ version changes, and the `CHECKED_ON` constant in `agentic_check.py` together.
 | No agentic-browsing category in a saved report | The report predates Lighthouse 13.2; rerun with a current version. |
 | WebMCP audits N/A | The testing browser lacked WebMCP support, or the page registers nothing. Not a defect. |
 | Site blocks the audit fetcher | Report the status and headers; do not retry with spoofed agent user agents unless step 4's authorization applies. |
-| URL blocked by url_safety | Explain the SSRF guard; for a host the user controls, see `CLAUDE_SEO_LOCAL_TARGETS`. |
+| URL blocked by url_safety | Explain the SSRF guard; for a host the user controls, see `CODEX_SEO_LOCAL_TARGETS`. |

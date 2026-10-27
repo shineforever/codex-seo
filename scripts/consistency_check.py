@@ -147,7 +147,7 @@ def check_skill_dir_script_refs(files, texts):
     source tree those scripts live at ``extensions/<name>/scripts``. Core skills
     must carry scripts inside their own skill directory before using this form.
     """
-    pat = re.compile(r'\$\{CLAUDE_SKILL_DIR\}/scripts/([A-Za-z0-9_]+\.py)\b')
+    pat = re.compile(r'\$\{CODEX_SKILL_DIR\}/scripts/([A-Za-z0-9_]+\.py)\b')
     errors = []
     for f in texts:
         for script in sorted(set(pat.findall(read(f)))):
@@ -158,7 +158,7 @@ def check_skill_dir_script_refs(files, texts):
                 skill_root = "/".join(f.split("/")[:2])
                 candidate = f"{skill_root}/scripts/{script}"
             else:
-                errors.append(f"{f}: CLAUDE_SKILL_DIR script used outside a skill layout")
+                errors.append(f"{f}: CODEX_SKILL_DIR script used outside a skill layout")
                 continue
             if candidate not in files and not os.path.isfile(os.path.join(REPO, candidate)):
                 errors.append(
@@ -178,10 +178,10 @@ def check_runtime_invocations(texts):
         r"\b(?:python3|python|py\s+-3)\s+[^\n`]*?scripts/[A-Za-z0-9_./-]+\.py"
     )
     raw_path = re.compile(r"(?<![\w/])scripts/([A-Za-z0-9_]+\.py)\b")
-    # The canonical form is "${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run <script>,
+    # The canonical form is "${CODEX_SEO_ROOT}/scripts/codex-seo" run <script>,
     # so the closing quote may sit between the launcher name and the subcommand.
     runtime = re.compile(
-        r"claude-seo[\"']?\s+run(?:\s+--extension\s+[a-z0-9-]+)?\s+([A-Za-z0-9_-]+\.py)"
+        r"codex-seo[\"']?\s+run(?:\s+--extension\s+[a-z0-9-]+)?\s+([A-Za-z0-9_-]+\.py)"
     )
     for f in carriers:
         content = read(f)
@@ -190,7 +190,7 @@ def check_runtime_invocations(texts):
         for script in sorted(set(raw_path.findall(content))):
             errors.append(
                 f"{f}: unsupported raw script path scripts/{script}; "
-                f'use "${{CLAUDE_PLUGIN_ROOT}}/scripts/claude-seo" run {script}'
+                f'use "${{CODEX_SEO_ROOT}}/scripts/codex-seo" run {script}'
             )
         for script in sorted(set(runtime.findall(content))):
             if not os.path.isfile(os.path.join(REPO, "scripts", script)) and not any(
@@ -228,7 +228,7 @@ def check_agent_refs(files, texts):
     repo-root ``agents/`` tree, and additionally against any extension's own
     ``extensions/<ext>/agents/`` tree. Extension-supplied agents
     (``seo-matomo``) ship only inside their extension and are copied into
-    ``~/.claude/agents/`` at install time, so a mention of them is live, not
+    ``~/.agents/skills/seo/agents/`` at install time, so a mention of them is live, not
     dead. Extensions whose agent is mirrored into the core tree
     (``seo-dataforseo``, ``seo-image-gen``) resolve either way.
     """

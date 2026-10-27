@@ -1,8 +1,6 @@
 ---
 name: seo-image-gen
 description: "AI image generation for SEO assets: OG/social preview images, blog hero images, schema images, product photography, infographics. Powered by Gemini via nanobanana-mcp. Requires banana extension installed. Use when the user wants an SEO asset and says \"OG image\", \"social preview\", \"hero image\", \"blog image\", \"product photo\", \"infographic\", \"seo image\", \"image-gen\", \"favicon\", \"schema image\", or \"pinterest pin\". Not for general artwork, banners, or thumbnails unrelated to SEO."
-argument-hint: "[og|hero|product|infographic|custom|batch] <description>"
-user-invocable: true
 license: MIT
 compatibility: "Requires nanobanana MCP server"
 metadata:
@@ -20,7 +18,7 @@ aspect ratios, and resolution defaults.
 ## Architecture Note
 
 This extension is built on [Claude Banana](https://github.com/AgriciDaniel/banana-claude),
-the standalone AI image generation skill for Claude Code.
+the standalone AI image generation skill for Codex CLI.
 
 This skill has two components with distinct roles:
 - **SKILL.md** (this file): Handles interactive `/seo image-gen` commands for generating images
@@ -143,7 +141,7 @@ Approximate costs:
 | API key invalid | New key at https://aistudio.google.com/apikey |
 | Rate limited (429) | Wait 60s, retry. Free tier: ~10 RPM / ~500 RPD |
 | `IMAGE_SAFETY` | Rephrase prompt - see `references/prompt-adaptation-safety.md` |
-| MCP unavailable | Configure MCP with `./extensions/banana/install.sh`; claude-seo does not vendor a local generation fallback script |
+| MCP unavailable | Configure MCP with `./extensions/banana/install.sh`; codex-seo does not vendor a local generation fallback script |
 | Extension not installed | Show install instructions: `./extensions/banana/install.sh` |
 
 ## Cross-Skill Integration

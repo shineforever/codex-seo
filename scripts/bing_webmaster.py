@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Bing Webmaster Tools API client for Claude SEO.
+Bing Webmaster Tools API client for Codex SEO.
 
 Queries the Bing Webmaster API for inbound link data, referring domain counts,
 and comparison between properties accessible to the same API account.
@@ -75,7 +75,7 @@ def _bing_request(endpoint: str, api_key: str, params: Optional[dict] = None,
 
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "ClaudeSEO/1.8.0",
+        "User-Agent": "CodexSEO/1.8.0",
     }
 
     try:
@@ -550,7 +550,7 @@ def main():
         result = {
             "status": "error",
             "data": None,
-            "error": "No Bing Webmaster API key configured. Run backlinks_auth.py --setup through the claude-seo launcher.",
+            "error": "No Bing Webmaster API key configured. Run backlinks_auth.py --setup through the codex-seo launcher.",
             "metadata": {"source": "bing_webmaster"},
         }
         if args.json:

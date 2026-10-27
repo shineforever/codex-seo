@@ -12,7 +12,7 @@ extensions/unlighthouse/install.sh:
 (b) ``ci-result.json`` was parsed assuming a dict; the default
     ``jsonSimple`` reporter (used whenever ``--reporter`` isn't passed)
     writes a flat JSON array of per-route results instead.
-(c) install.sh required ``~/.claude/skills/seo`` to exist, which is never
+(c) install.sh required ``~/.agents/skills/seo`` to exist, which is never
     true for a marketplace/plugin install, so the installer always
     aborted in that path.
 
@@ -160,9 +160,9 @@ def test_normalize_tolerates_garbage_input():
 # --------------------------------------------------------------------------
 
 
-def test_installer_detects_plugin_install_paths():
+def test_installer_detects_installed_skill_paths():
     text = (ROOT / "extensions" / "unlighthouse" / "install.sh").read_text(encoding="utf-8")
-    assert "CLAUDE_PLUGIN_ROOT" in text
-    assert "plugins/cache" in text
+    assert "CODEX_SEO_ROOT" in text
+    assert ".agents/skills" in text
     # The old unconditional abort before any plugin-path check is gone.
-    assert '[ ! -d "${SKILL_DIR}/seo" ] && { echo "✗ claude-seo base not installed."; exit 1; }' not in text
+    assert '[ ! -d "${SKILL_DIR}/seo" ] && { echo "✗ codex-seo base not installed."; exit 1; }' not in text

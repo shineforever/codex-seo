@@ -4,38 +4,39 @@
 
 - **Python 3.11 to 3.14** with pip. Python 3.10 reached end of life in October 2026, and 3.15 waits on the Google Ads client library
 - **Git** for cloning the repository
-- **Claude Code CLI** installed and configured
+- **OpenAI Codex CLI** installed and configured
 
 Optional:
 - **Playwright Chromium** - install.sh attempts this automatically; failure is non-fatal; needed only for SPA rendering and screenshots
 
 ## Quick Install
 
-### Plugin Install (Claude Code 1.0.33+)
+### Quick Install (Unix, macOS, Linux)
 
-The recommended path. Inside Claude Code:
+The recommended path:
 
 ```
-/plugin marketplace add AgriciDaniel/claude-seo
-/plugin install claude-seo@agricidaniel-claude-seo
-/seo setup
+git clone --depth 1 https://github.com/zhtyyx/codex-seo.git
+bash codex-seo/install.sh
 ```
 
-Plugin installation does not run package managers. `/seo setup` is an explicit,
-one-time provisioning step that writes the virtual environment and browser only
-to Claude's persistent plugin data. Use `/seo doctor` for a read-only check.
+The installer copies the skills to `~/.agents/skills/` and the `/seo` custom
+prompt to `~/.codex/prompts/seo.md`, then provisions an isolated runtime.
+`/seo setup` is an explicit, one-time provisioning step that writes the virtual
+environment and browser only to the installed skill directory. Use
+`/seo doctor` for a read-only check.
 
-### Manual Install (Unix, macOS, Linux)
+### Quick Install (Windows, PowerShell)
 
 ```bash
-git clone --depth 1 https://github.com/AgriciDaniel/claude-seo.git
-bash claude-seo/install.sh
+git clone --depth 1 https://github.com/zhtyyx/codex-seo.git
+bash codex-seo/install.sh
 ```
 
 Review-then-run alternative:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh > install.sh
+curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh > install.sh
 cat install.sh        # review
 bash install.sh       # run when satisfied
 rm install.sh
@@ -44,19 +45,19 @@ rm install.sh
 ### Manual Install (Windows, PowerShell)
 
 ```powershell
-git clone --depth 1 https://github.com/AgriciDaniel/claude-seo.git
-powershell -ExecutionPolicy Bypass -File claude-seo\install.ps1
+git clone --depth 1 https://github.com/zhtyyx/codex-seo.git
+powershell -ExecutionPolicy Bypass -File codex-seo\install.ps1
 ```
 
-The Windows path uses `git clone` rather than `irm | iex` because Claude Code's own security guardrails flag piped remote-script execution. Inspect `install.ps1` before running.
+The Windows path uses `git clone` rather than `irm | iex` because piped remote-script execution is a supply chain risk. Inspect `install.ps1` before running.
 
 ## Manual Installation
 
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/AgriciDaniel/claude-seo.git
-cd claude-seo
+git clone https://github.com/zhtyyx/codex-seo.git
+cd codex-seo
 ```
 
 2. **Run the installer**
@@ -68,11 +69,11 @@ cd claude-seo
 3. **Verify the managed runtime**
 
 The installer delegates dependency and Chromium provisioning to the same runtime
-used by every skill. It creates `~/.claude/skills/seo/.venv/` and never falls
+used by every skill. It creates `~/.agents/skills/seo/.venv/` and never falls
 back to global or user package installation.
 
 ```bash
-~/.claude/skills/seo/scripts/claude-seo doctor
+~/.agents/skills/seo/scripts/codex-seo doctor
 ```
 
 If core setup failed, rerun the inspected installer. If only Chromium failed,
@@ -84,18 +85,18 @@ The installer copies files to:
 
 | Component | Path |
 |-----------|------|
-| Main skill | `~/.claude/skills/seo/` |
-| Sub-skills | `~/.claude/skills/seo-*/` |
-| Subagents | `~/.claude/agents/seo-*.md` |
-| Runtime launcher | `~/.claude/skills/seo/scripts/claude-seo` |
-| Isolated Python | `~/.claude/skills/seo/.venv/` |
+| Main skill | `~/.agents/skills/seo/` |
+| Sub-skills | `~/.agents/skills/seo-*/` |
+| Subagents | `~/.agents/skills/seo/agents/seo-*.md` |
+| Runtime launcher | `~/.agents/skills/seo/scripts/codex-seo` |
+| Isolated Python | `~/.agents/skills/seo/.venv/` |
 
 ## Verify Installation
 
-1. Start Claude Code:
+1. Start Codex CLI:
 
 ```bash
-claude
+codex
 ```
 
 2. Check that the skill is loaded:
@@ -108,21 +109,13 @@ You should see a help message or prompt for a URL.
 
 ## Uninstallation
 
-If installed as a plugin:
-
-```
-/plugin uninstall claude-seo@agricidaniel-claude-seo
-/plugin marketplace remove AgriciDaniel/claude-seo
-```
-
-If installed manually, run the uninstaller from a fresh clone:
+Run the uninstaller from a checkout:
 
 ```bash
-git clone --depth 1 https://github.com/AgriciDaniel/claude-seo.git
-bash claude-seo/uninstall.sh
+bash uninstall.sh
 ```
 
-`uninstall.sh` removes all installed sub-skills, sub-agents, and the plugin's MCP entries from `~/.claude/settings.json`. Do not maintain a hand-coded `rm` list. The shipped uninstaller is the canonical source.
+`uninstall.sh` removes all installed sub-skills, the role playbooks, and the `/seo` custom prompt. Extension MCP entries in `~/.codex/config.toml` are removed by each extension's own uninstaller. Do not maintain a hand-coded `rm` list. The shipped uninstaller is the canonical source.
 
 ## Upgrading
 
@@ -132,10 +125,10 @@ Caution: Prefer downloading, inspecting, then running remote scripts; the pipe-t
 
 ```bash
 # Uninstall current version
-curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/uninstall.sh | bash
 
 # Install new version
-curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh | bash
 ```
 
 ## Troubleshooting
@@ -145,7 +138,7 @@ curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/instal
 Ensure the skill is installed in the correct location:
 
 ```bash
-ls ~/.claude/skills/seo/SKILL.md
+ls ~/.agents/skills/seo/SKILL.md
 ```
 
 If the file doesn't exist, re-run the installer.
@@ -155,7 +148,7 @@ If the file doesn't exist, re-run the installer.
 Run the managed setup again:
 
 ```bash
-~/.claude/skills/seo/scripts/claude-seo setup
+~/.agents/skills/seo/scripts/codex-seo setup
 ```
 
 ### Playwright screenshot errors
@@ -163,8 +156,8 @@ Run the managed setup again:
 Run the managed setup again and inspect the result:
 
 ```bash
-~/.claude/skills/seo/scripts/claude-seo setup
-~/.claude/skills/seo/scripts/claude-seo doctor
+~/.agents/skills/seo/scripts/codex-seo setup
+~/.agents/skills/seo/scripts/codex-seo doctor
 ```
 
 ### Permission errors on Unix
@@ -172,5 +165,5 @@ Run the managed setup again and inspect the result:
 Make sure scripts are executable:
 
 ```bash
-chmod +x ~/.claude/skills/seo/scripts/*.py
+chmod +x ~/.agents/skills/seo/scripts/*.py
 ```

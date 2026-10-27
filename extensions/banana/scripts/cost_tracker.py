@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Claude Banana - Cost Tracker
+"""Banana - Cost Tracker
 
 Track image generation costs, view summaries, and estimate batch costs.
 
@@ -297,7 +297,7 @@ def cmd_reset(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Claude Banana Cost Tracker")
+    parser = argparse.ArgumentParser(description="Banana Cost Tracker")
     sub = parser.add_subparsers(dest="command", required=True)
 
     # log

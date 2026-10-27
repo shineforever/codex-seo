@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import runtime  # noqa: E402
 
-LAUNCHER = ROOT / "scripts" / "claude-seo"
+LAUNCHER = ROOT / "scripts" / "codex-seo"
 MIN_MINOR = runtime.MIN_PYTHON[1]
 MAX_MINOR = runtime.MAX_PYTHON[1]
 
@@ -36,7 +36,7 @@ def test_runtime_range_is_three_eleven_to_three_fourteen() -> None:
 
 
 def test_every_copy_of_the_range_matches_runtime() -> None:
-    launcher = _read("scripts/claude-seo")
+    launcher = _read("scripts/codex-seo")
     assert f"min_minor={MIN_MINOR}" in launcher
     assert f"max_minor={MAX_MINOR}" in launcher
     ps1 = _read("install.ps1")
@@ -56,7 +56,7 @@ def test_every_copy_of_the_range_matches_runtime() -> None:
 
 
 def test_no_launcher_or_workflow_still_accepts_three_ten() -> None:
-    for relative in ("scripts/claude-seo", "install.ps1", ".github/workflows/ci.yml",
+    for relative in ("scripts/codex-seo", "install.ps1", ".github/workflows/ci.yml",
                      ".github/workflows/v2.yml", ".github/workflows/windows-smoke.yml"):
         text = _read(relative)
         assert "(3, 10)" not in text, relative
@@ -65,7 +65,7 @@ def test_no_launcher_or_workflow_still_accepts_three_ten() -> None:
 
 def test_powershell_installer_honors_override_and_versioned_fallbacks() -> None:
     ps1 = _read("install.ps1")
-    assert "$env:CLAUDE_SEO_PYTHON" in ps1
+    assert "$env:CODEX_SEO_PYTHON" in ps1
     assert "\"-3.$minor\"" in ps1
     assert "\"python3.$minor\"" in ps1
 
@@ -138,6 +138,6 @@ def test_launcher_names_the_range_when_nothing_fits(tmp_path) -> None:
 @posix_only
 def test_launcher_rejects_an_unsupported_override(tmp_path) -> None:
     bin_dir = _stub_dir(tmp_path, {"python3": "3.12", "py315": "3.15"})
-    result = _launch(bin_dir, CLAUDE_SEO_PYTHON=str(bin_dir / "py315"))
+    result = _launch(bin_dir, CODEX_SEO_PYTHON=str(bin_dir / "py315"))
     assert result.returncode == 2
-    assert "CLAUDE_SEO_PYTHON must be Python 3.11 to 3.14. Found 3.15" in result.stderr
+    assert "CODEX_SEO_PYTHON must be Python 3.11 to 3.14. Found 3.15" in result.stderr

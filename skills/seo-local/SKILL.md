@@ -5,8 +5,6 @@ description: >
   citations, reviews, local schema, location pages, and multi-location
   structure. Use when the user asks about local SEO, a local business, the map
   pack, or a GBP profile; use seo-maps for geo-grid rank tracking.
-user-invocable: true
-argument-hint: "[url]"
 license: MIT
 metadata:
   author: AgriciDaniel

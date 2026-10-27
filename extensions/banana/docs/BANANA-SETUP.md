@@ -13,45 +13,38 @@
 ## MCP Server Configuration
 
 The installer configures this automatically. If you need to set it up manually,
-add to `~/.claude.json`:
+add to `~/.codex/config.toml`:
 
-```json
-{
-  "mcpServers": {
-    "nanobanana-mcp": {
-      "command": "npx",
-      "args": ["-y", "@ycse/nanobanana-mcp@1.1.1"],
-      "env": {
-        "GOOGLE_AI_API_KEY": "your-api-key-here"
-      }
-    }
-  }
-}
+```toml
+[mcp_servers.nanobanana-mcp]
+command = "npx"
+args = ["-y", "@ycse/nanobanana-mcp@1.1.1"]
+env = { GOOGLE_AI_API_KEY = "your-api-key-here" }
 ```
 
 Scripted setup helper:
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run --extension banana setup_mcp.py --key YOUR_KEY
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run --extension banana setup_mcp.py --key YOUR_KEY
 ```
 
 ## Verifying Installation
 
 Run the validation script:
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run --extension banana validate_setup.py
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run --extension banana validate_setup.py
 ```
 
 Or check manually:
-1. `ls ~/.claude/skills/seo-image-gen/SKILL.md`:skill file exists
-2. `ls ~/.claude/agents/seo-image-gen.md`:agent file exists
-3. `grep nanobanana ~/.claude.json`:MCP configured
+1. `ls ~/.agents/skills/seo-image-gen/SKILL.md`:skill file exists
+2. `ls ~/.agents/skills/seo/agents/seo-image-gen.md`:agent file exists
+3. `grep nanobanana ~/.codex/config.toml`:MCP configured
 
 ## Common Issues
 
 ### "MCP tools not available"
-- Restart Claude Code after installing the extension
+- Restart Codex CLI after installing the extension
 - Verify your API key is valid at [aistudio.google.com](https://aistudio.google.com)
-- Check `~/.claude.json` has the nanobanana-mcp entry
+- Check `~/.codex/config.toml` has the nanobanana-mcp entry
 
 ### "Rate limited (429)"
 - Check current free-tier limits in Google AI Studio
@@ -60,7 +53,7 @@ Or check manually:
 
 ### "IMAGE_SAFETY" error
 - The safety filter flagged your prompt (often a false positive)
-- Claude will suggest rephrased alternatives automatically
+- Codex will suggest rephrased alternatives automatically
 - Common triggers: certain color descriptions, implied scenarios
 - See `references/prompt-adaptation-safety.md` (Safety Filter Rephrase Strategies)
 
@@ -71,7 +64,7 @@ Or check manually:
 
 ### Generated images not appearing
 - Default output directory: `~/Documents/nanobanana_generated/`
-- Check the path returned by Claude after generation
+- Check the path returned by Codex after generation
 - Verify disk space is available
 
 ## ImageMagick (Optional)

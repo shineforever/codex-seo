@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Setup script for Claude Banana MCP server in Claude Code.
+Setup script for the nanobanana MCP server in Codex CLI.
 
-Configures @ycse/nanobanana-mcp in Claude Code's ~/.claude.json
-with the user's Google AI API key.
+Configures @ycse/nanobanana-mcp in Codex CLI's ~/.codex/config.toml
+(TOML [mcp_servers.nanobanana-mcp] block) with the user's Google AI API key.
 
 Usage:
     python3 setup_mcp.py                    # Interactive (prompts for key)
@@ -13,41 +13,51 @@ Usage:
     python3 setup_mcp.py --help             # Show usage
 """
 
-import json
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
 
-SETTINGS_PATH = Path.home() / ".claude.json"
+SETTINGS_PATH = Path.home() / ".codex" / "config.toml"
 MCP_NAME = "nanobanana-mcp"
 MCP_PACKAGE = "@ycse/nanobanana-mcp@1.1.1"
 
-
-def load_settings() -> dict:
-    """Load Claude Code ~/.claude.json."""
-    if not SETTINGS_PATH.exists():
-        return {}
-    with open(SETTINGS_PATH, "r") as f:
-        return json.load(f)
+BEGIN = f"# codex-seo:mcp:{MCP_NAME} begin"
+END = f"# codex-seo:mcp:{MCP_NAME} end"
 
 
-def save_settings(settings: dict) -> None:
-    """Save Claude Code ~/.claude.json atomically.
+def _strip_block(text: str) -> str:
+    lines = text.splitlines(keepends=True)
+    out = []
+    inside = False
+    for line in lines:
+        if line.strip() == BEGIN:
+            inside = True
+            continue
+        if line.strip() == END:
+            inside = False
+            continue
+        if not inside:
+            out.append(line)
+    return "".join(out)
 
-    ~/.claude.json is shared with Claude Code itself and other installers, so
-    a write is staged to a temp file in the same directory and swapped into
-    place with ``os.replace`` (atomic on POSIX and Windows). This avoids a
-    reader ever observing a truncated or partially written file, and avoids
-    corrupting the file if this process is interrupted mid-write.
+
+def _atomic_write(content: str) -> None:
+    """Write ~/.codex/config.toml atomically.
+
+    The file is shared with Codex CLI itself and other installers, so a write
+    is staged to a temp file in the same directory and swapped into place
+    with ``os.replace`` (atomic on POSIX and Windows).
     """
     SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_path = tempfile.mkstemp(
-        prefix=".claude.json.", suffix=".tmp", dir=str(SETTINGS_PATH.parent)
+        prefix=".config.toml.", suffix=".tmp", dir=str(SETTINGS_PATH.parent)
     )
     try:
-        with os.fdopen(fd, "w") as f:
-            json.dump(settings, f, indent=2)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+        os.chmod(tmp_path, 0o600)
         os.replace(tmp_path, SETTINGS_PATH)
     except BaseException:
         try:
@@ -55,21 +65,34 @@ def save_settings(settings: dict) -> None:
         except OSError:
             pass
         raise
-    print(f"Settings saved to {SETTINGS_PATH}")
+
+
+def _toml_str(value: str) -> str:
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def load_block() -> str | None:
+    """Return the current nanobanana block text, or None."""
+    try:
+        text = SETTINGS_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return None
+    m = re.search(re.escape(BEGIN) + r"\n(.*?)" + re.escape(END), text, re.DOTALL)
+    return m.group(1) if m else None
 
 
 def check_setup() -> bool:
     """Check if MCP is already configured."""
-    settings = load_settings()
-    servers = settings.get("mcpServers", {})
-    if MCP_NAME in servers:
-        env = servers[MCP_NAME].get("env", {})
-        key = env.get("GOOGLE_AI_API_KEY", "")
+    block = load_block()
+    if block:
+        key_match = re.search(r'GOOGLE_AI_API_KEY\s*=\s*"(.*)"', block)
+        key = key_match.group(1) if key_match else ""
         masked = "..." + key[-4:] if len(key) > 12 else "(not set)"
         print(f"MCP server '{MCP_NAME}' is configured.")
         print(f"  Package: {MCP_PACKAGE}")
         print(f"  API Key: {masked}")
-        model = env.get("NANOBANANA_MODEL")
+        model_match = re.search(r'NANOBANANA_MODEL\s*=\s*"(.*)"', block)
+        model = model_match.group(1) if model_match else ""
         print(f"  Model:   {model if model else 'MCP package default'}")
         return True
     print(f"MCP server '{MCP_NAME}' is NOT configured.")
@@ -78,42 +101,46 @@ def check_setup() -> bool:
 
 def remove_mcp() -> None:
     """Remove MCP configuration."""
-    settings = load_settings()
-    servers = settings.get("mcpServers", {})
-    if MCP_NAME in servers:
-        del servers[MCP_NAME]
-        settings["mcpServers"] = servers
-        save_settings(settings)
-        print(f"Removed '{MCP_NAME}' from Claude Code settings.")
-    else:
+    try:
+        text = SETTINGS_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
         print(f"'{MCP_NAME}' not found in settings.")
+        return
+    updated = _strip_block(text)
+    if updated == text:
+        print(f"'{MCP_NAME}' not found in settings.")
+        return
+    _atomic_write(updated)
+    print(f"Removed '{MCP_NAME}' from Codex CLI config.")
 
 
 def setup_mcp(api_key: str) -> None:
-    """Configure MCP server in Claude Code settings."""
+    """Configure MCP server in Codex CLI config."""
     if not api_key or not api_key.strip():
         print("Error: API key cannot be empty.")
         sys.exit(1)
 
     api_key = api_key.strip()
-    settings = load_settings()
+    try:
+        text = SETTINGS_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        text = ""
+    text = _strip_block(text)
 
-    if "mcpServers" not in settings:
-        settings["mcpServers"] = {}
-
-    settings["mcpServers"][MCP_NAME] = {
-        "command": "npx",
-        "args": ["-y", MCP_PACKAGE],
-        "env": {
-            "GOOGLE_AI_API_KEY": api_key,
-        },
-    }
-
-    save_settings(settings)
+    block = (
+        f"{BEGIN}\n"
+        f"[mcp_servers.{MCP_NAME}]\n"
+        f"command = \"npx\"\n"
+        f"args = [\"-y\", {_toml_str(MCP_PACKAGE)}]\n"
+        f"env = {{ GOOGLE_AI_API_KEY = {_toml_str(api_key)} }}\n"
+        f"{END}\n"
+    )
+    content = (text.rstrip("\n") + "\n\n" if text.strip() else "") + block
+    _atomic_write(content)
     print(f"\nMCP server '{MCP_NAME}' configured successfully!")
     print(f"  Package: {MCP_PACKAGE}")
     print("  Model:   MCP package default")
-    print("\nRestart Claude Code for changes to take effect.")
+    print("\nRestart Codex CLI for changes to take effect.")
     print("Generated images will be saved to: ~/Documents/nanobanana_generated/")
 
 
@@ -152,7 +179,7 @@ def main() -> None:
         api_key = os.environ.get("GOOGLE_AI_API_KEY")
 
     if not api_key:
-        print("Claude Banana - MCP Setup")
+        print("Codex SEO image generation - MCP Setup")
         print("=" * 40)
         print("\nGet your free API key at: https://aistudio.google.com/apikey")
         print()

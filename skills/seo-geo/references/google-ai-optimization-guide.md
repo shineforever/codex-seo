@@ -4,7 +4,7 @@ Google published a dedicated **AI optimization guide** under Search Central
 docs (under the new "Generative AI fundamentals" section; announced via the
 Search Central blog 2026-05-15, doc last updated 2026-07-10). Its position is
 the most-cited primary source for how AI Overviews and AI Mode interact with
-Search ranking. Every claude-seo audit that touches GEO should treat this doc
+Search ranking. Every codex-seo audit that touches GEO should treat this doc
 as the canonical reference and reject community claims that contradict it.
 
 **Primary source:**
@@ -16,7 +16,7 @@ https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
 > rankings; third-party tools have **no access to Google's internal ranking
 > data**; Google does not endorse vendors; evaluate AEO/GEO claims against
 > official guidance; Search Console is the authoritative first-party source.
-> claude-seo's scores are heuristics, not Google-internal signals; state this
+> codex-seo's scores are heuristics, not Google-internal signals; state this
 > honestly in reports. Source:
 > https://developers.google.com/search/docs/fundamentals/third-party-seo
 
@@ -105,7 +105,7 @@ Two operational requirements with concrete enforcement surfaces:
 
 1. **Merchant Center: AI-generated product images:** must carry IPTC
    `DigitalSourceType: TrainedAlgorithmicMedia` metadata. See
-   `${CLAUDE_PLUGIN_ROOT}/skills/seo-images/SKILL.md` for the audit + injection pattern.
+   `${CODEX_SEO_ROOT}/skills/seo-images/SKILL.md` for the audit + injection pattern.
 2. **AI-generated product titles and descriptions:** must be separately
    specified and labeled as AI-generated in the merchant feed.
 
@@ -115,25 +115,25 @@ The AI optimization guide pivots near the end to **AI agents**, not just
 summarizers. Agents interact with sites through three channels: screenshots
 plus a vision model, raw HTML/DOM, and the browser accessibility tree.
 
-Full audit criteria: `${CLAUDE_PLUGIN_ROOT}/skills/seo-agentic/references/agent-friendly-pages.md` (run `/seo agentic`).
+Full audit criteria: `${CODEX_SEO_ROOT}/skills/seo-agentic/references/agent-friendly-pages.md` (run `/seo agentic`).
 
 The guide itself does not mention WebMCP (checked 2026-09-23); WebMCP status,
 consumers and safe patterns are tracked separately in
-`${CLAUDE_PLUGIN_ROOT}/skills/seo-agentic/references/webmcp.md`. The guide does
+`${CODEX_SEO_ROOT}/skills/seo-agentic/references/webmcp.md`. The guide does
 name **UCP** (Universal
 Commerce Protocol, open standard co-developed with Shopify, Etsy, Wayfair,
 Target, Walmart; Google-confirmed reference implementation in AI Mode in
 Search; ucp.dev lists 2026-08-25 as the latest date-based release, while
 Google's merchant guide documents 2026-04-08). UCP audit criteria:
-`${CLAUDE_PLUGIN_ROOT}/skills/seo-ecommerce/references/ucp-universal-commerce-protocol.md`.
+`${CODEX_SEO_ROOT}/skills/seo-ecommerce/references/ucp-universal-commerce-protocol.md`.
 
-## How claude-seo treats this guide
+## How codex-seo treats this guide
 
 1. `seo-geo` audits cite this URL as the authoritative source whenever the
    user asks about AEO/GEO frameworks.
 2. The myth-busting list above gates community-sourced AI-SEO recommendations:
    if a recommendation contradicts Google's stated position, flag it.
-3. Where a third-party claim and Google contradict, claude-seo defers to
+3. Where a third-party claim and Google contradict, codex-seo defers to
    Google and notes the contradiction explicitly.
 4. `seo-ecommerce` and `seo-images` enforce the two operational requirements
    above for sites using AI to generate product content.
@@ -146,4 +146,4 @@ Google's merchant guide documents 2026-04-08). UCP audit criteria:
 - Any of the linked policy docs revise eligibility or enforcement language.
 - The UCP / WebMCP standards advance (UCP spec 2026-08-25 on ucp.dev, 2026-04-08
   in Google's merchant guide; WebMCP status is tracked in
-  `${CLAUDE_PLUGIN_ROOT}/skills/seo-agentic/references/vendor-matrix.md`).
+  `${CODEX_SEO_ROOT}/skills/seo-agentic/references/vendor-matrix.md`).

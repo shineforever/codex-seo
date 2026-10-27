@@ -1,4 +1,4 @@
-# Prompt Adaptation, Mistakes and Safety Rephrasing: Claude Banana
+# Prompt Adaptation, Mistakes and Safety Rephrasing: Banana
 
 > Split from `prompt-engineering.md`. Load it when adapting a prompt to a model, reviewing a weak prompt, or handling an `IMAGE_SAFETY` block.
 

@@ -1,10 +1,10 @@
-# Contributing to claude-seo
+# Contributing to codex-seo
 
 Thanks for your interest in contributing! Here's how to get involved.
 
 ## Reporting Bugs
 
-Open a [GitHub Issue](https://github.com/AgriciDaniel/claude-seo/issues) with:
+Open a [GitHub Issue](https://github.com/zhtyyx/codex-seo/issues) with:
 
 - Your OS and Python version
 - The full error output (copy from terminal)
@@ -13,7 +13,7 @@ Open a [GitHub Issue](https://github.com/AgriciDaniel/claude-seo/issues) with:
 
 ## Suggesting Features
 
-Use [GitHub Discussions](https://github.com/AgriciDaniel/claude-seo/discussions) for feature ideas and questions.
+Use [GitHub Discussions](https://github.com/zhtyyx/codex-seo/discussions) for feature ideas and questions.
 
 ## Pull Requests
 
@@ -28,8 +28,8 @@ Use [GitHub Discussions](https://github.com/AgriciDaniel/claude-seo/discussions)
 #### Option A: Local install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/claude-seo.git
-cd claude-seo
+git clone https://github.com/YOUR_USERNAME/codex-seo.git
+cd codex-seo
 bash install.sh
 ```
 
@@ -52,7 +52,7 @@ install chromium`). No additional setup needed for either.
 
 ### Guidelines
 
-- All Python scripts should output JSON for Claude Code to parse
+- All Python scripts should output JSON for Codex CLI to parse
 - Shell scripts should use `set -euo pipefail` for safety
 - SKILL.md files must stay under 500 lines
 - Reference files should be focused and under 200 lines
@@ -67,7 +67,7 @@ install chromium`). No additional setup needed for either.
 
 ## Community Extensions (Pro Hub Challenge)
 
-Claude SEO accepts community-built extensions through challenges and PRs.
+Codex SEO accepts community-built extensions through challenges and PRs.
 v1.9.0 integrated 5 challenge submissions and v1.9.7 added 9 community pull
 requests from 7 contributors. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the
 full credits.
@@ -77,4 +77,4 @@ To submit a community extension:
 2. Keep SKILL.md under 500 lines, references under 200 lines
 3. All URL-fetching scripts must route through `scripts/url_safety.py` — the canonical SSRF / DNS-rebinding layer (`validate_url()`, `safe_requests_session()`); never fetch a user-supplied URL without it. (`google_auth.py` is OAuth token lifecycle only — not an SSRF guard.)
 4. Include `original_author` in your SKILL.md frontmatter metadata
-5. Submit a PR or post in the [AI Marketing Hub](https://www.skool.com/ai-marketing-hub)
+5. Submit a PR against this repository

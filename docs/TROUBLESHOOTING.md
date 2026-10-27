@@ -8,29 +8,27 @@
 
 **Solutions:**
 
-For plugin installs, verify and reinstall through Claude Code:
+Reinstall through the installer:
 ```bash
-/plugin list
-/plugin marketplace add AgriciDaniel/claude-seo
-/plugin install claude-seo@agricidaniel-claude-seo
+bash install.sh
 ```
 
-For manual installs:
+Or verify the installation:
 
 1. Verify installation:
 ```bash
-ls ~/.claude/skills/seo/SKILL.md
+ls ~/.agents/skills/seo/SKILL.md
 ```
 
 2. Check SKILL.md has proper frontmatter:
 ```bash
-head -5 ~/.claude/skills/seo/SKILL.md
+head -5 ~/.agents/skills/seo/SKILL.md
 ```
 Should start with `---` followed by YAML.
 
-3. Restart Claude Code:
+3. Restart Codex CLI:
 ```bash
-claude
+codex
 ```
 
 4. Re-run installer:
@@ -38,7 +36,7 @@ claude
 Caution: Prefer downloading, inspecting, then running remote scripts; the pipe-to-shell form below is the less-safe convenience option.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh | bash
 ```
 
 ---
@@ -58,8 +56,8 @@ Dependencies belong in the managed runtime. For a plugin install, run:
 
 For a manual install, run:
 ```bash
-~/.claude/skills/seo/scripts/claude-seo doctor
-~/.claude/skills/seo/scripts/claude-seo setup
+~/.agents/skills/seo/scripts/codex-seo doctor
+~/.agents/skills/seo/scripts/codex-seo setup
 ```
 
 Do not install individual packages, use `pip --user`, or create a PATH shim.
@@ -68,22 +66,16 @@ Do not install individual packages, use `pip --user`, or create a PATH shim.
 
 **Symptom:** `No such file: requirements.txt` after install
 
-**Solution:** For plugin installs, reinstall the plugin first:
+**Solution:** requirements.txt is copied to the skill directory:
 
 ```bash
-/plugin install claude-seo@agricidaniel-claude-seo
-```
-
-For manual installs, requirements.txt is copied to the skill directory:
-
-```bash
-ls ~/.claude/skills/seo/requirements.txt
+ls ~/.agents/skills/seo/requirements.txt
 ```
 
 If missing, download it directly:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/requirements.txt \
-  -o ~/.claude/skills/seo/requirements.txt
+curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/requirements.txt \
+  -o ~/.agents/skills/seo/requirements.txt
 ```
 
 ### Windows Python Detection Issues
@@ -93,8 +85,8 @@ curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/requir
 **Solution (v1.2.0+):** The Windows installer now tries both `python` and `py -3`. If both fail:
 
 1. Install Python from [python.org](https://python.org) and check "Add to PATH"
-2. Rerun `install.ps1`. It uses `CLAUDE_SEO_PYTHON` when set, otherwise the first of `py -3`, `python3` and `python` that is Python 3.11 to 3.14, otherwise the newest of `py -3.14` down to `py -3.11`
-3. If `py -3` is a newer Python that Claude SEO does not support yet (such as 3.15), install 3.14 alongside it, or set `CLAUDE_SEO_PYTHON` to a supported `python.exe`
+2. Rerun `install.ps1`. It uses `CODEX_SEO_PYTHON` when set, otherwise the first of `py -3`, `python3` and `python` that is Python 3.11 to 3.14, otherwise the newest of `py -3.14` down to `py -3.11`
+3. If `py -3` is a newer Python that Codex SEO does not support yet (such as 3.15), install 3.14 alongside it, or set `CODEX_SEO_PYTHON` to a supported `python.exe`
 4. Run `/seo doctor` after installation
 
 ---
@@ -118,7 +110,7 @@ interpreter and persistent browser directory:
 
 **Solution:**
 ```bash
-chmod +x ~/.claude/skills/seo/scripts/*.py
+chmod +x ~/.agents/skills/seo/scripts/*.py
 ```
 
 ---
@@ -131,23 +123,19 @@ chmod +x ~/.claude/skills/seo/scripts/*.py
 
 **Solution:**
 
-For plugin installs, check `/plugin list` and reinstall `claude-seo@agricidaniel-claude-seo`; subagents load from the plugin, not `~/.claude/agents/`.
-
-For manual installs:
-
 1. Verify agent files exist:
 ```bash
-ls ~/.claude/agents/seo-*.md
+ls ~/.agents/skills/seo/agents/seo-*.md
 ```
 
 2. Check agent frontmatter:
 ```bash
-head -5 ~/.claude/agents/seo-technical.md
+head -5 ~/.agents/skills/seo/agents/seo-technical.md
 ```
 
 3. Re-install agents:
 ```bash
-cp /path/to/claude-seo/agents/*.md ~/.claude/agents/
+cp /path/to/codex-seo/agents/*.md ~/.agents/skills/seo/agents/
 ```
 
 ---
@@ -198,19 +186,19 @@ cp /path/to/claude-seo/agents/*.md ~/.claude/agents/
 
 2. **GitHub Issues:** Report bugs at the repository
 
-3. **Logs:** Check Claude Code's output for error details
+3. **Logs:** Check Codex CLI's output for error details
 
 ## Debug Mode
 
-To see detailed output, check Claude Code's internal logs or run scripts directly:
+To see detailed output, check Codex CLI's internal logs or run scripts directly:
 
 ```bash
 # Test fetch
-python3 ~/.claude/skills/seo/scripts/fetch_page.py https://example.com
+python3 ~/.agents/skills/seo/scripts/fetch_page.py https://example.com
 
 # Test parse
-python3 ~/.claude/skills/seo/scripts/parse_html.py page.html --json
+python3 ~/.agents/skills/seo/scripts/parse_html.py page.html --json
 
 # Test screenshot
-python3 ~/.claude/skills/seo/scripts/capture_screenshot.py https://example.com
+python3 ~/.agents/skills/seo/scripts/capture_screenshot.py https://example.com
 ```

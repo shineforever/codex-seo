@@ -19,31 +19,24 @@ It will prompt for your API key and configure the MCP server.
 
 ## 3. Manual MCP Configuration
 
-If the installer fails, add this to `~/.claude.json` manually:
+If the installer fails, add this to `~/.codex/config.toml` manually:
 
-```json
-{
-  "mcpServers": {
-    "firecrawl-mcp": {
-      "command": "npx",
-      "args": ["-y", "firecrawl-mcp"],
-      "env": {
-        "FIRECRAWL_API_KEY": "fc-your-api-key-here"
-      }
-    }
-  }
-}
+```toml
+[mcp_servers.firecrawl-mcp]
+command = "npx"
+args = ["-y", "firecrawl-mcp"]
+env = { FIRECRAWL_API_KEY = "fc-your-api-key-here" }
 ```
 
 ## 4. Verify Installation
 
-Start Claude Code and try:
+Start Codex CLI and try:
 
 ```
 /seo firecrawl map https://example.com
 ```
 
-You should see a list of discovered URLs. If you get a "tool not available" error, restart Claude Code to reload MCP servers.
+You should see a list of discovered URLs. If you get a "tool not available" error, restart Codex CLI to reload MCP servers.
 
 ## 5. Understanding Credits
 

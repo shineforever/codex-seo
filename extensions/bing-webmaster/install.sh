@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-# Claude SEO: Bing Webmaster + IndexNow extension installer.
+# Codex SEO: Bing Webmaster + IndexNow extension installer.
 #
 # Wires the existing scripts/bing_webmaster.py and indexnow_submit.py into
 # a discoverable seo-bing skill and stores the Bing Webmaster Tools API
-# key + IndexNow host key in ~/.claude/settings.json.
+# key + IndexNow host key in ~/.codex/settings.json.
 #
 # Microsoft Copilot citations are fed by the Bing index, making this the
 # canonical extension for "AI search visibility outside Google".
 set -euo pipefail
 
 main() {
-    SKILL_DIR="${HOME}/.claude/skills"
-    SETTINGS_JSON="${HOME}/.claude/settings.json"
+    SKILL_DIR="${HOME}/.agents/skills"
+    SETTINGS_JSON="${HOME}/.codex/config.toml"
 
     echo "════════════════════════════════════════"
-    echo "║ Claude SEO: Bing Webmaster + IndexNow ║"
+    echo "║ Codex SEO: Bing Webmaster + IndexNow ║"
     echo "════════════════════════════════════════"
 
     command -v python3 >/dev/null 2>&1 || { echo "✗ Python 3 required."; exit 1; }
-    [ ! -d "${SKILL_DIR}/seo" ] && { echo "✗ claude-seo base not installed."; exit 1; }
+    [ ! -d "${SKILL_DIR}/seo" ] && { echo "✗ codex-seo base not installed."; exit 1; }
 
     SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd)"
 
@@ -34,30 +34,24 @@ main() {
     mkdir -p "${SKILL_DIR}/seo-bing"
     cp "${SOURCE_DIR}/skills/seo-bing/SKILL.md" "${SKILL_DIR}/seo-bing/SKILL.md"
 
-    CLAUDE_SEO_SECRET="${BING_KEY}" CLAUDE_SEO_INDEXNOW_KEY="${INDEXNOW_KEY}" python3 - "${SETTINGS_JSON}" "${INDEXNOW_LOC}" <<'PY'
-import json, os, sys, tempfile
-path = sys.argv[1]
-idx_loc = sys.argv[2] if len(sys.argv) > 2 else ""
-bing = os.environ.get("CLAUDE_SEO_SECRET", "")
-idx_key = os.environ.get("CLAUDE_SEO_INDEXNOW_KEY", "")
-data = {}
-if os.path.exists(path):
-    try: data = json.load(open(path))
-    except json.JSONDecodeError: sys.exit(f"✗ {path} is not valid JSON. Nothing was changed; fix it and rerun.")
-env = data.setdefault("env", {})
-if bing: env["BING_WEBMASTER_API_KEY"] = bing
-if idx_key: env["INDEXNOW_KEY"] = idx_key
-if idx_loc: env["INDEXNOW_KEY_LOCATION"] = idx_loc
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path) or ".", prefix=".settings.", suffix=".json")
-with os.fdopen(fd, "w") as fh: json.dump(data, fh, indent=2)
-os.chmod(tmp, 0o600); os.replace(tmp, path)
-print(f"✓ Wrote Bing + IndexNow env to {path}")
-PY
+    HELPER="${SEO_SKILL_DIR:-${SKILL_DIR}/seo}/scripts/codex_config.py"
+    [ -f "${HELPER}" ] || HELPER="${SOURCE_DIR}/../../scripts/codex_config.py"
+    if [ -n "${BING_KEY}" ]; then
+        BING_WEBMASTER_API_KEY="${BING_KEY}" \
+        python3 "${HELPER}" env-set BING_WEBMASTER_API_KEY --pass-from BING_WEBMASTER_API_KEY
+    fi
+    if [ -n "${INDEXNOW_KEY}" ]; then
+        INDEXNOW_KEY="${INDEXNOW_KEY}" \
+        python3 "${HELPER}" env-set INDEXNOW_KEY --pass-from INDEXNOW_KEY
+    fi
+    [ -n "${INDEXNOW_LOC}" ] && \
+        python3 "${HELPER}" env-set "INDEXNOW_KEY_LOCATION=${INDEXNOW_LOC}"
+    echo "✓ Wrote Bing + IndexNow keys to ~/.config/codex-seo/env.json"
 
     echo
     echo "Done. Verify your IndexNow key is published (manual install path shown;"
-    echo "plugin installs use \"\${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo\" instead):"
-    echo "  \"\$HOME/.claude/skills/seo/scripts/claude-seo\" run indexnow_submit.py --host example.com \\"
+    echo "plugin installs use \"\${CODEX_SEO_ROOT}/scripts/codex-seo\" instead):"
+    echo "  \"\$HOME/.agents/skills/seo/scripts/codex-seo\" run indexnow_submit.py --host example.com \\"
     echo "    --key \$INDEXNOW_KEY --key-location \$INDEXNOW_KEY_LOCATION --verify-only"
 }
 main "$@"

@@ -41,9 +41,8 @@ def test_dataforseo_agent_bodies_stay_mirrored():
 
 
 def test_dataforseo_installers_use_matching_mcp_server_name():
-    # install.sh still merges the entry with a Python dict subscript;
-    # install.ps1 merges it natively with Add-Member (v2.3.1, atomic
-    # ConvertTo-Json write). Either way the server must be registered as
-    # exactly "dataforseo" to match the agents' `mcp__dataforseo__*` grant.
-    assert "['dataforseo']" in _text(ROOT / "extensions/dataforseo/install.sh")
-    assert "-NotePropertyName 'dataforseo'" in _text(ROOT / "extensions/dataforseo/install.ps1")
+    # Both installers register the server through scripts/codex_config.py.
+    # It must be registered as exactly "dataforseo" to match the agents'
+    # `mcp__dataforseo__*` grant.
+    assert "add dataforseo " in _text(ROOT / "extensions/dataforseo/install.sh")
+    assert "add dataforseo " in _text(ROOT / "extensions/dataforseo/install.ps1")

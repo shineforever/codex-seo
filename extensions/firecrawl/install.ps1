@@ -1,26 +1,26 @@
-# Firecrawl Extension Installer for Claude SEO (Windows)
+# Firecrawl Extension Installer for Codex SEO (Windows)
 $ErrorActionPreference = 'Stop'
 
 Write-Host "====================================" -ForegroundColor Cyan
 Write-Host "  Firecrawl Extension - Installer" -ForegroundColor Cyan
-Write-Host "  For Claude SEO" -ForegroundColor Cyan
+Write-Host "  For Codex SEO" -ForegroundColor Cyan
 Write-Host "====================================" -ForegroundColor Cyan
 Write-Host ""
 
-$SkillDir = "$env:USERPROFILE\.claude\skills\seo-firecrawl"
-$SeoSkillDir = "$env:USERPROFILE\.claude\skills\seo"
-# MCP servers live in ~/.claude.json (the file `claude mcp add` writes).
-# NOT ~/.claude/settings.json - `mcpServers` is not a key Claude Code reads
+$SkillDir = "$env:USERPROFILE\.agents\skills\seo-firecrawl"
+$SeoSkillDir = "$env:USERPROFILE\.agents\skills\seo"
+# MCP servers live in ~/.codex/config.toml (the file `codex mcp add` writes).
+# NOT ~/.codex/settings.json - `mcpServers` is not a key Codex CLI reads
 # there, so entries written to settings.json silently never load.
-$McpConfigFile = "$env:USERPROFILE\.claude.json"
+$McpConfigFile = "$env:USERPROFILE\.codex/config.toml"
 
 # Check prerequisites
 if (-not (Test-Path $SeoSkillDir)) {
-    Write-Host "x Claude SEO is not installed." -ForegroundColor Red
-    Write-Host "  Install it first: irm https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.ps1 | iex"
+    Write-Host "x Codex SEO is not installed." -ForegroundColor Red
+    Write-Host "  Install it first: irm https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.ps1 | iex"
     exit 1
 }
-Write-Host "v Claude SEO detected" -ForegroundColor Green
+Write-Host "v Codex SEO detected" -ForegroundColor Green
 
 $nodeVersion = (node -v 2>$null) -replace 'v',''
 if (-not $nodeVersion) {
@@ -67,32 +67,15 @@ Write-Host "=> Installing Firecrawl skill..." -ForegroundColor Yellow
 New-Item -ItemType Directory -Force -Path $SkillDir | Out-Null
 Copy-Item "$SourceDir\skills\seo-firecrawl\SKILL.md" "$SkillDir\SKILL.md" -Force
 
-# Configure MCP server
-Write-Host "=> Configuring MCP server..." -ForegroundColor Yellow
-$settingsContent = if (Test-Path $McpConfigFile) { Get-Content $McpConfigFile -Raw | ConvertFrom-Json } else { [pscustomobject]@{} }
-if (-not $settingsContent.mcpServers) { $settingsContent | Add-Member -NotePropertyName mcpServers -NotePropertyValue ([pscustomobject]@{}) -Force }
-$settingsContent.mcpServers | Add-Member -NotePropertyName 'firecrawl-mcp' -NotePropertyValue @{
-    command = 'npx'
-    args = @('-y', 'firecrawl-mcp@3.11.0')
-    env = @{ FIRECRAWL_API_KEY = $apiKeyPlain }
-} -Force
-# Write atomically: stage to a temp file in the same directory, then swap
-# it into place, so a crash mid-write never leaves ~/.claude.json truncated
-# or half-written (it is shared with Claude Code and other installers).
-# -Depth 100 (not the ConvertTo-Json default of 2, or the previous 10) so an
-# existing ~/.claude.json with deeply nested config round-trips intact.
-$TempConfigFile = Join-Path (Split-Path -Parent $McpConfigFile) ".claude.json.$([guid]::NewGuid().ToString('N')).tmp"
-$jsonText = $settingsContent | ConvertTo-Json -Depth 100
-# Write without a byte-order mark: on Windows PowerShell 5.1, Set-Content -Encoding UTF8
-# emits a BOM and Node's JSON.parse rejects it, which would make ~/.claude.json unreadable.
-[System.IO.File]::WriteAllText($TempConfigFile, $jsonText, (New-Object System.Text.UTF8Encoding $false))
-Move-Item -Path $TempConfigFile -Destination $McpConfigFile -Force
-# Restrict the credential-bearing settings file to the current user only.
+$Helper = Join-Path $HOME ".agents/skills/seo/scripts/codex_config.py"
+if (-not (Test-Path $Helper)) { $Helper = Join-Path (Split-Path -Parent (Split-Path -Parent $SourceDir)) "scripts/codex_config.py" }
+if (-not (Test-Path $Helper)) { throw "codex_config.py not found (reinstall codex-seo)" }
+$env:FIRECRAWL_API_KEY = $apiKeyPlain
 try {
-    icacls $McpConfigFile /inheritance:r /grant:r "${env:USERNAME}:F" | Out-Null
-} catch {
-    Write-Host "  Note: could not restrict ~/.claude.json ACL; review manually." -ForegroundColor Yellow
-}
+    python $Helper add firecrawl-mcp --command npx '--arg=-y' --arg 'firecrawl-mcp@3.11.0' --env-pass FIRECRAWL_API_KEY --config-path $McpConfigFile
+    if ($LASTEXITCODE -ne 0) { throw "Nothing was saved (python exited $LASTEXITCODE). See the message above." }
+} finally { Remove-Item Env:FIRECRAWL_API_KEY -ErrorAction SilentlyContinue }
+Write-Host "  v MCP server configured" -ForegroundColor Green
 Write-Host "  v MCP server configured" -ForegroundColor Green
 
 # Pre-warm

@@ -1,186 +1,220 @@
-# Claude SEO: Multi-Platform Agent Instructions
+# Codex SEO: Universal SEO Analysis Skill
 
-> For **Cursor**, **Cursor Cloud Agents**, **Google Antigravity**, **Gemini CLI**,
-> **Grok Build**,
-> **OpenAI Codex CLI**, **Cline**, **Aider**, and any other agent harness that
-> reads project-root agent instructions.
->
-> Claude Code users: see `CLAUDE.md` instead.
+> Project instructions for **OpenAI Codex CLI** (this file is read automatically
+> at session start) and any other agent harness that reads project-root agent
+> instructions: Cursor, Cursor Cloud Agents, Google Antigravity, Gemini CLI,
+> Grok Build, Cline, Aider.
 
-## Cross-platform portability (v2.0.0)
+## Portability note
 
-Every skill in `skills/*/SKILL.md` is authored to a portable subset of the
-Claude Code skill spec. Validate compatibility with your harness via:
+Codex SEO is a Codex CLI port of [Claude SEO](https://github.com/AgriciDaniel/claude-seo)
+by Agrici Daniel (MIT). Skills follow the Agent Skills open standard
+(`SKILL.md` with `name`/`description` frontmatter), so the same files load in
+any compatible harness. Validate with:
 
 ```bash
-./scripts/claude-seo run portability_check.py
+./scripts/codex-seo run portability_check.py
 ```
-
-The check confirms each `SKILL.md` has the minimum frontmatter every harness
-expects (`name`, `description`, optional `model`, optional `tools`) and warns
-on Claude-Code-specific features (`maxTurns`, multi-line tool list with
-descriptive comments) that other harnesses may ignore but do not reject.
 
 ### Per-harness notes
 
-| Harness | How to load claude-seo |
+| Harness | How to load codex-seo |
 |---|---|
+| **OpenAI Codex CLI** | Install skills to `~/.agents/skills/` via `bash install.sh` (Codex discovers user skills there), or work inside this repo: Codex scans `.agents/skills` up to the repo root. The `/seo` slash command is a custom prompt copied to `~/.codex/prompts/seo.md`; skills can also be invoked as `$seo audit <url>`. |
 | **Cursor** | Symlink or copy `skills/` and `agents/` into `.cursor/rules/`. Commands are invoked as text prompts; the harness reads `SKILL.md` body as system context. |
 | **Cursor Cloud Agents** | Push the repo; Cloud Agents read `AGENTS.md` automatically at session start. |
 | **Google Antigravity** | Point the workspace at this repo root; Antigravity reads `AGENTS.md` first, falls back to `skills/`. |
 | **Gemini CLI** | `gemini init` in this repo loads `AGENTS.md`. Skills are activated via `activate_skill <name>` in conversation. |
-| **Grok Build** | Open this repository in Grok Build. It reads `AGENTS.md` and Claude Code compatible plugins and skills without a separate layout. Use `grok inspect` to verify discovery. See the [official compatibility guide](https://docs.x.ai/build/features/skills-plugins-marketplaces). |
-| **OpenAI Codex CLI** | Reads `AGENTS.md` from project root. Bash tools work as documented; some Claude-specific tool names (Read/Write/Edit) are aliased to Codex equivalents transparently. |
-| **Cline** | Loads `AGENTS.md` from project root. Skills appear as system messages; subagent delegation falls back to in-context expansion. |
-| **Aider** | Reads `AGENTS.md` if present; otherwise falls back to README. Aider does not support sub-agent dispatch; the seo-* skills run inline. |
+| **Grok Build** | Open this repository in Grok Build. It reads `AGENTS.md` and Agent Skills compatible layouts without a separate layout. |
+| **Cline** | Loads `AGENTS.md` from project root. Skills appear as system messages. |
+| **Aider** | Reads `AGENTS.md` if present; otherwise falls back to README. Skills run inline. |
 
-### Tool-name compatibility
+## Project Overview
 
-Where claude-seo skills mention Claude Code tools (`Read`, `Write`, `Edit`,
-`Bash`, `Glob`, `Grep`, `WebFetch`), each harness typically has an equivalent:
-
-| Claude Code | Codex | Cline | Aider | Cursor / Antigravity |
-|---|---|---|---|---|
-| Read       | read_file        | read_file       | (inline)        | read |
-| Write      | write_file       | write_file      | /add then edit  | write |
-| Edit       | apply_diff       | replace_in_file | /edit           | edit |
-| Bash       | bash             | execute_command | /run            | shell |
-| Glob       | glob             | search_files    | (inline)        | find |
-| Grep       | grep             | search_files    | /grep           | grep |
-| WebFetch   | fetch / browse   | (browser tool)  | (n/a)           | fetch |
-
-These mappings are automatic in most harnesses; we list them for transparency
-in case a recipe needs a specific call.
-
-## Overview
-
-Claude SEO is a Tier 4 SEO analysis skill with 26 sub-skills (22 core + 1 orchestrator +
-1 framework integration + 2 extension mirrors), 19 sub-agents (16 core + 1 framework
-integration + 2 extension mirrors), and 60 Python execution scripts.
-
-## Quick Reference
-
-| Command | What it does |
-|---------|-------------|
-| `/seo audit <url>` | Full website audit with parallel subagent delegation |
-| `/seo page <url>` | Deep single-page analysis |
-| `/seo technical <url>` | Technical SEO audit (9 categories) |
-| `/seo content <url>` | E-E-A-T and content quality analysis |
-| `/seo content-brief <topic>` | Generate a content brief for a topic |
-| `/seo schema <url>` | Schema.org detection, validation, generation |
-| `/seo sitemap <url>` | XML sitemap analysis or generation |
-| `/seo images <url>` | Image SEO: on-page audit, SERP analysis, file optimization |
-| `/seo geo <url>` | AI Overviews / Generative Engine Optimization |
-| `/seo plan <type>` | Strategic SEO planning |
-| `/seo cluster <keyword>` | SERP-based semantic clustering and content architecture |
-| `/seo sxo <url>` | Search Experience Optimization: page-type analysis, personas |
-| `/seo drift baseline <url>` | Capture SEO baseline for change monitoring |
-| `/seo drift compare <url>` | Compare current state to stored baseline |
-| `/seo drift history <url>` | Show drift history over time |
-| `/seo ecommerce <url>` | E-commerce SEO: product schema, marketplace intelligence |
-| `/seo programmatic [url]` | Programmatic SEO at scale |
-| `/seo competitor-pages [url]` | Competitor comparison pages |
-| `/seo flow [stage]` | FLOW framework prompts (Find, Leverage, Optimize, Win, Local; prompts/sync utilities.) |
-| `/seo local <url>` | Local SEO analysis (GBP, citations, reviews) |
-| `/seo maps [cmd] [args]` | Maps intelligence (geo-grid, GBP audit, competitors) |
-| `/seo hreflang <url>` | Hreflang/i18n SEO audit, cultural profiles, content parity |
-| `/seo google [cmd] [url]` | Google SEO APIs (GSC, PageSpeed, CrUX, Indexing, GA4) |
-| `/seo backlinks <url>` | Backlink profile analysis |
-| `/seo backlinks setup` | Setup free backlink APIs |
-| `/seo backlinks verify <url>` | Verify known backlinks still exist |
-| `/seo dataforseo [cmd]` | Live SEO data via DataForSEO (extension) |
-| `/seo image-gen [use-case]` | AI image generation for SEO assets (extension) |
-| `/seo firecrawl [cmd] <url>` | Full-site crawling and site mapping (extension) |
-| `/seo ahrefs [cmd] <target>` | Ahrefs backlink and keyword data (extension) |
-| `/seo bing [cmd] <url>` | Bing Webmaster data and IndexNow (extension) |
-| `/seo profound [cmd]` | LLM brand-citation tracking (extension) |
-| `/seo seranking [cmd]` | AI share-of-voice tracking (extension) |
-| `/seo matomo [cmd] [args]` | Matomo Reporting API: GA4 alternative or supplement (extension) |
-| `/seo unlighthouse <url>` | Multi-page Lighthouse audits (extension) |
-
-## Using with Cursor / Cursor Cloud
-
-Cursor reads this file automatically. All SKILL.md files contain the full
-analysis logic as natural language instructions. Python scripts in `scripts/`
-provide execution capabilities.
-
-**Running scripts directly** (Cursor doesn't have MCP):
-```bash
-# Page fetching with SSRF protection
-./scripts/claude-seo run fetch_page.py https://example.com
-
-# HTML parsing for SEO elements
-./scripts/claude-seo run parse_html.py https://example.com
-
-# PageSpeed Insights
-./scripts/claude-seo run pagespeed_check.py https://example.com --json
-
-# Drift baseline
-./scripts/claude-seo run drift_baseline.py https://example.com
-
-# DataForSEO (requires credentials)
-DATAFORSEO_USERNAME=user DATAFORSEO_PASSWORD=pass ./scripts/claude-seo run dataforseo_merchant.py search "keyword"
-```
-
-**Cursor Cloud gotchas:**
-- SSL certificates may not resolve for some domains. Investigate the certificate issue rather than disabling verification.
-- Run bundled tools through `claude-seo`; never call the venv interpreter directly.
-- Screenshots save to `/tmp/` not CWD. Check absolute paths.
-
-## Using with Google Antigravity
-
-Antigravity discovers this project via `.claude-plugin/plugin.json`.
-Place the repo in `~/.gemini/antigravity/plugins/claude-seo/` or install via:
-
-```bash
-bash install.sh
-```
+This repository contains **Codex SEO**, a comprehensive SEO analysis skill suite
+for Codex CLI. It follows the Agent Skills open standard and the 3-layer
+architecture (directive, orchestration, execution). 26 sub-skills (22 core +
+1 orchestrator + 1 framework integration + 2 extension mirrors), 19 specialist
+role playbooks (16 core + 1 framework integration + 2 extension mirrors; Codex
+runs them as sequential role passes, see "Execution model" below), and an
+extensible reference system cover technical SEO, content quality, schema
+markup, image optimization, sitemap architecture, AI search optimization,
+local SEO (GBP, citations, reviews, map pack), maps intelligence, semantic
+topic clustering, search experience optimization (SXO), SEO drift monitoring,
+e-commerce SEO, and international SEO with cultural adaptation profiles.
+Matomo is available as an optional extension for self-hosted analytics.
 
 ## Architecture
 
 ```
-skills/                    # 26 sub-skills (auto-discovered)
-  seo/SKILL.md            # Main orchestrator + routing
-  seo-cluster/            # Semantic clustering (v1.9.0)
-  seo-sxo/                # Search Experience Optimization (v1.9.0)
-  seo-drift/              # SEO drift monitoring (v1.9.0)
-  seo-ecommerce/          # E-commerce SEO (v1.9.0)
-  seo-audit/              # Full site audit
-  seo-page/               # Single-page analysis
-  seo-technical/          # Technical SEO
-  seo-content/            # E-E-A-T quality
-  seo-content-brief/      # Content brief generation
-  seo-schema/             # Schema.org markup
-  seo-sitemap/            # XML sitemaps
-  seo-images/             # Image optimization
-  seo-geo/                # AI search / GEO
-  seo-agentic/            # Agent readiness (Lighthouse Agentic Browsing, WebMCP)
-  seo-local/              # Local SEO
-  seo-maps/               # Maps intelligence
-  seo-plan/               # Strategic planning
-  seo-hreflang/           # International SEO
-  seo-google/             # Google APIs
-  seo-backlinks/          # Backlink analysis
-  seo-programmatic/       # Programmatic SEO
-  seo-competitor-pages/   # Competitor pages
-  seo-flow/               # FLOW framework integration
-  seo-dataforseo/         # DataForSEO (extension)
-  seo-image-gen/          # AI images (extension)
-agents/                    # 19 subagents
-scripts/                   # 60 Python scripts, including the managed runtime
-schema/                    # JSON-LD templates
-extensions/                # 9 MCP extensions: DataForSEO, Firecrawl, Banana, Ahrefs, SE Ranking, Profound, Bing Webmaster, Matomo, Unlighthouse
+codex-seo/
+  AGENTS.md                          # Project instructions (this file)
+  CONTRIBUTORS.md                    # Community credits
+  codex-prompts/seo.md               # /seo custom prompt (installed to ~/.codex/prompts)
+  skills/                            # 26 sub-skills (installed to ~/.agents/skills)
+    seo/                           # Main orchestrator skill
+      SKILL.md                     # Entry point, routing table, core rules
+      references/                  # On-demand knowledge files (13 files)
+    seo-audit/SKILL.md            # Full site audit with sequential role passes
+    seo-page/SKILL.md             # Deep single-page analysis
+    seo-technical/SKILL.md        # Technical SEO (9 categories)
+    seo-content/SKILL.md          # E-E-A-T and content quality
+    seo-content-brief/SKILL.md    # Content brief generation
+    seo-schema/SKILL.md           # Schema.org markup detection/generation
+    seo-sitemap/SKILL.md          # XML sitemap analysis/generation
+    seo-images/SKILL.md           # Image optimization analysis
+    seo-geo/SKILL.md              # AI search / GEO optimization
+    seo-agentic/                  # Agent readiness (Lighthouse Agentic Browsing, WebMCP)
+    seo-local/SKILL.md            # Local SEO (GBP, citations, reviews, map pack)
+    seo-maps/SKILL.md             # Maps intelligence (geo-grid, GBP audit, reviews, competitors)
+    seo-plan/SKILL.md             # Strategic SEO planning
+    seo-flow/SKILL.md             # FLOW framework integration
+    seo-programmatic/SKILL.md     # Programmatic SEO at scale
+    seo-competitor-pages/SKILL.md # Competitor comparison pages
+    seo-hreflang/SKILL.md         # International SEO / hreflang
+    seo-google/                   # Google SEO APIs
+    seo-backlinks/SKILL.md        # Backlink profile analysis
+    seo-cluster/                  # Semantic topic clustering
+    seo-sxo/                      # Search Experience Optimization
+    seo-drift/                    # SEO drift monitoring
+    seo-ecommerce/                # E-commerce SEO
+    seo-dataforseo/SKILL.md       # Live SEO data via DataForSEO MCP (extension mirror)
+    seo-image-gen/                # AI image generation for SEO assets (extension mirror)
+  agents/                          # 19 specialist role playbooks
+    seo-technical.md             # Crawlability, indexability, security
+    seo-content.md               # E-E-A-T, readability, thin content
+    ... (see agents/ directory)
+  scripts/                         # 61 Python execution scripts
+    codex-seo                    # Runtime launcher (bash)
+    runtime.py                   # Managed venv runtime (setup/doctor/run)
+    codex_config.py              # MCP + env config helper for ~/.codex
+    google_auth.py               # Credential management (OAuth, SA, API key)
+    fetch_page.py                # Page fetcher with UA rotation
+    url_safety.py                # Canonical URL/SSRF safety module
+    ... (see scripts/ directory)
+  schema/                          # Schema.org JSON-LD templates
+  extensions/                      # Optional add-on install helpers (9 extensions)
+    dataforseo/ firecrawl/ banana/ ahrefs/ bing-webmaster/
+    profound/ seranking/ matomo/ unlighthouse/
+  docs/                            # Extended documentation
 ```
+
+## Execution model (Codex CLI)
+
+Codex CLI runs every analysis in the main session; it has no declarative
+subagent dispatch. The 19 `agents/*.md` files are **role playbooks**: during a
+full audit the orchestrator skill loads each playbook, executes it end to end,
+writes findings to `output_dir/findings/<role>.md`, then moves to the next
+role. Installers place the playbooks at `~/.agents/skills/seo/agents/`.
+
+### Tool-name compatibility
+
+Where skills mention harness tools (`Read`, `Write`, `Edit`, `Bash`, `Glob`,
+`Grep`, `WebFetch`), each harness has an equivalent:
+
+| Skill text | Codex | Cline | Aider | Cursor / Antigravity |
+|---|---|---|---|---|
+| Read       | read_file        | read_file       | (inline)        | read |
+| Write      | write_file       | write_file       | /add then edit  | write |
+| Edit       | apply_patch      | replace_in_file | /edit           | edit |
+| Bash       | shell            | execute_command | /run            | terminal |
+| Glob       | shell glob       | search_files    | (inline)        | find |
+| Grep       | shell grep       | search_files    | /grep           | grep |
+| WebFetch   | shell curl / browse | (browser tool) | (n/a)        | fetch |
+
+These mappings are automatic in most harnesses; they are listed for
+transparency in case a recipe needs a specific call.
+
+Bundled tools run through the launcher:
+
+```bash
+# inside a clone (CODEX_SEO_ROOT is the repo root)
+./scripts/codex-seo run <script.py>
+# after install.sh (canonical absolute form, rewritten by the installer)
+"$HOME/.agents/skills/seo/scripts/codex-seo" run <script.py>
+```
+
+## Commands
+
+| Command | Use Case |
+|---------|----------|
+| `/seo audit <url>` | Full website audit with sequential role passes |
+| `/seo page <url>` | Single page analysis |
+| `/seo technical <url>` | Technical SEO across 9 categories |
+| `/seo content <url>` | E-E-A-T and content quality |
+| `/seo content-brief <topic>` | Detailed content brief: keywords, outline, internal links |
+| `/seo schema <url>` | Schema markup detection, validation, generation |
+| `/seo sitemap <url>` | Sitemap validation |
+| `/seo sitemap generate` | Create new sitemap with industry templates |
+| `/seo images <url>` | Image optimization |
+| `/seo geo <url>` | AI search optimization (GEO) |
+| `/seo agentic <url>` | Agent readiness (Lighthouse Agentic Browsing, AI agent access, WebMCP) |
+| `/seo local <url>` | Local SEO (GBP, citations, reviews) |
+| `/seo maps [command]` | Maps intelligence (geo-grid, GBP audit, competitors) |
+| `/seo backlinks <url>` | Backlink profile analysis |
+| `/seo cluster <seed>` | SERP-based semantic clustering |
+| `/seo sxo <url>` | Search Experience Optimization |
+| `/seo drift baseline\|compare\|history <url>` | SEO drift monitoring |
+| `/seo ecommerce <url>` | E-commerce SEO |
+| `/seo hreflang [url]` | Hreflang and international SEO |
+| `/seo plan <type>` | Strategic planning by industry |
+| `/seo programmatic [url\|plan]` | Programmatic SEO analysis |
+| `/seo competitor-pages [url\|generate]` | Competitor comparison pages |
+| `/seo flow [stage] [url\|topic]` | FLOW framework prompts |
+| `/seo google [command] [url]` | Google SEO APIs (GSC, PSI, CrUX, GA4) |
+| `/seo dataforseo [command]` | Live SEO data (extension) |
+| `/seo image-gen [use-case] <desc>` | AI image generation (extension) |
+| `/seo firecrawl [command] <url>` | Full-site crawling (extension) |
+| `/seo ahrefs [command] <url>` | Backlinks, organic keywords, and content data via the official Ahrefs MCP (extension) |
+| `/seo seranking [command]` | AI Share-of-Voice across ChatGPT, Gemini, Perplexity, AI Overviews, AI Mode (extension) |
+| `/seo profound [command]` | LLM citation tracking with time-series data (extension) |
+| `/seo bing [command] <url>` | Bing Webmaster Tools + IndexNow URL submission (extension) |
+| `/seo unlighthouse <url>` | Multi-page Lighthouse runner, runs locally (extension) |
+
+## Development Rules
+
+- Keep SKILL.md files under 500 lines / 5000 tokens
+- Reference files should be focused and under 200 lines
+- Scripts must have docstrings, CLI interface, and JSON output
+- Follow kebab-case naming for all skill directories
+- Bundled tools run through `"${CODEX_SEO_ROOT}/scripts/codex-seo" run`; the installer rewrites this to `"$HOME/.agents/skills/seo/scripts/codex-seo"`
+- Extension credentials persist in `~/.config/codex-seo/env.json`; the launcher merges them into every bundled script's environment
+- Manual Python dependencies install into `~/.agents/skills/seo/.venv/`
+- Test with `python3 -m pytest tests/` after changes (if applicable)
+
+## Security Rules
+
+- **Never commit credentials**: `.env`, `client_secret*.json`, `oauth-token.json`, `service_account*.json` are all in `.gitignore`
+- **URL validation**: All scripts that connect to user-supplied URLs must use `scripts/url_safety.py` (`validate_url_strict()` plus the pinned safe request helpers). This blocks private IPs, loopback, metadata endpoints, redirect rebinding, and DNS rebinding.
+- **OAuth tokens**: Never store `client_secret` in the token file. Read it from the client_secret.json file at runtime.
+- **No hardcoded paths**: Use `os.path.dirname(os.path.abspath(__file__))` for relative paths, never a user-specific absolute path
+- **Config location**: `~/.config/codex-seo/google-api.json` and `~/.config/codex-seo/backlinks-api.json` (user-space, not in repo)
+
+## Report Generation Rules
+
+- **All SEO reports must use `scripts/google_report.py`** as the canonical report generator
+- **Dependencies**: `matplotlib>=3.8.0` (charts) + `weasyprint>=70.0` (HTML-to-PDF), both in `requirements.txt`
+- **Format**: A4 PDF via WeasyPrint + matplotlib charts at 200 DPI
+- **Style**: Clean white title page with navy (#1e3a5f) accent, Times New Roman body font
+- **Color palette**: Navy #1e3a5f (headers), dark gold #b8860b (accents), forest green #2d6a4f (pass), warm amber #d4740e (warnings), deep red #c53030 (fail), warm cream #faf9f7 (backgrounds)
+- **Structure**: Title page → TOC with scores → Executive Summary → Data sections → Recommendations → Methodology
+- **Charts**: 85% width, max-height 120mm, figure captions on every chart, saved to `charts/` at 200 DPI
+- **No `page-break-inside: avoid`** on any element (causes white gaps in WeasyPrint)
+- **Post-generation review**: `_review_pdf()` runs automatically, checking for empty images, thin sections, duplicates
+- **Before presenting any PDF to the user**: verify the review passes (`"status": "PASS"`)
+- **Cross-skill enforcement**: After completing ANY analysis command (audit, page, technical, content, schema, geo, local, maps), offer: "Generate a PDF report? Use `/seo google report`"
+- **Google logo** appears on title page when using Google API data ("Powered by Google APIs")
 
 ## Key Principles
 
-1. **Progressive Disclosure**: Read SKILL.md for routing, load references on demand
+1. **Progressive Disclosure**: Metadata always loaded, instructions on activation, resources on demand
 2. **Industry Detection**: Auto-detect SaaS, e-commerce, local, publisher, agency
-3. **Security**: All scripts call `validate_url()` for SSRF protection
-4. **Config location**: `~/.config/claude-seo/` for API credentials
+3. **Sequential Role Passes**: Full audits execute all 17 analyst roles with findings persisted per role
+4. **Extension System**: DataForSEO, Firecrawl, Banana, Ahrefs, SE Ranking, Profound, Bing Webmaster, Matomo, and Unlighthouse extensions
 
 ## Credits
 
+Port of [claude-seo](https://github.com/AgriciDaniel/claude-seo) for OpenAI Codex CLI.
 Created by [@AgriciDaniel](https://github.com/AgriciDaniel).
 v1.9.0 community contributions by Lutfiya Miller, Chris Muller, Florian Schmitz,
 Dan Colta, and Matej Marjanovic. See [CONTRIBUTORS.md](CONTRIBUTORS.md).

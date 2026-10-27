@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Validate that the Claude Banana MCP server is properly configured.
+Validate that the nanobanana MCP server is properly configured.
 
 Checks:
-1. Claude Code ~/.claude.json has the MCP entry
+1. Codex CLI ~/.codex/config.toml has the MCP entry (TOML marker block)
 2. API key is present
 3. Node.js/npx is available
 4. Output directory exists or can be created
@@ -12,15 +12,17 @@ Usage:
     python3 validate_setup.py
 """
 
-import argparse
-import json
+import re
 import shutil
 import sys
 from pathlib import Path
 
-SETTINGS_PATH = Path.home() / ".claude.json"
+SETTINGS_PATH = Path.home() / ".codex/config.toml"
 MCP_NAME = "nanobanana-mcp"
 OUTPUT_DIR = Path.home() / "Documents" / "nanobanana_generated"
+
+BEGIN = f"# codex-seo:mcp:{MCP_NAME} begin"
+END = f"# codex-seo:mcp:{MCP_NAME} end"
 
 
 def check(label: str, passed: bool, detail: str = "") -> bool:
@@ -32,67 +34,51 @@ def check(label: str, passed: bool, detail: str = "") -> bool:
     return passed
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Validate the Claude Banana MCP server setup."
-    )
-    return parser.parse_args()
+def _load_block() -> str:
+    try:
+        text = SETTINGS_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ""
+    m = re.search(re.escape(BEGIN) + r"\n(.*?)" + re.escape(END), text, re.DOTALL)
+    return m.group(1) if m else ""
 
 
 def main() -> int:
-    parse_args()
-
-    print("Claude Banana - Setup Validation")
+    print("Codex SEO image generation - Setup Validation")
     print("=" * 40)
     results = []
 
     # 1. Settings file exists
     results.append(check(
-        "Claude Code ~/.claude.json exists",
+        "Codex CLI ~/.codex/config.toml exists",
         SETTINGS_PATH.exists(),
         str(SETTINGS_PATH),
     ))
 
     if not SETTINGS_PATH.exists():
-        print("\nCannot continue without ~/.claude.json.")
+        print("\nCannot continue without ~/.codex/config.toml.")
         return 1
 
-    # 2. Load and parse settings
-    try:
-        with open(SETTINGS_PATH) as f:
-            settings = json.load(f)
-        results.append(check("~/.claude.json is valid JSON", True))
-    except json.JSONDecodeError as e:
-        results.append(check("~/.claude.json is valid JSON", False, str(e)))
-        return 1
-
-    # 3. MCP entry exists
-    servers = settings.get("mcpServers", {})
-    has_mcp = MCP_NAME in servers
+    # 2-3. MCP entry exists (marker block)
+    block = _load_block()
+    has_mcp = bool(block)
     results.append(check(f"MCP server '{MCP_NAME}' configured", has_mcp))
 
     if has_mcp:
-        mcp = servers[MCP_NAME]
-
         # 4. Command is npx
-        results.append(check(
-            "Command is 'npx'",
-            mcp.get("command") == "npx",
-            mcp.get("command", "(missing)"),
-        ))
+        cmd_match = re.search(r'^command\s*=\s*"([^"]*)"', block, re.MULTILINE)
+        command = cmd_match.group(1) if cmd_match else ""
+        results.append(check("Command is 'npx'", command == "npx", command or "(missing)"))
 
         # 5. Package is correct
-        args = mcp.get("args", [])
-        has_pkg = "@ycse/nanobanana-mcp" in args
-        results.append(check(
-            "Package is @ycse/nanobanana-mcp",
-            has_pkg,
-            str(args),
-        ))
+        args_match = re.search(r"^args\s*=\s*\[(.*)\]", block, re.MULTILINE)
+        args_text = args_match.group(1) if args_match else ""
+        has_pkg = "@ycse/nanobanana-mcp" in args_text
+        results.append(check("Package is @ycse/nanobanana-mcp", has_pkg, args_text))
 
         # 6. API key present
-        env = mcp.get("env", {})
-        key = env.get("GOOGLE_AI_API_KEY", "")
+        key_match = re.search(r'GOOGLE_AI_API_KEY\s*=\s*"([^"]*)"', block)
+        key = key_match.group(1) if key_match else ""
         results.append(check(
             "GOOGLE_AI_API_KEY is set",
             bool(key),
@@ -100,7 +86,8 @@ def main() -> int:
         ))
 
         # 7. Model configured
-        model = env.get("NANOBANANA_MODEL", "")
+        model_match = re.search(r'NANOBANANA_MODEL\s*=\s*"([^"]*)"', block)
+        model = model_match.group(1) if model_match else ""
         results.append(check(
             "NANOBANANA_MODEL is set",
             bool(model),

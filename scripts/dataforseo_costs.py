@@ -8,9 +8,9 @@ Provides cost-aware guardrails for DataForSEO API usage:
 - Session and daily budget tracking
 - Spending history and summaries
 
-Config: ~/.config/claude-seo/dataforseo-costs.json
-Ledger: ~/.config/claude-seo/dataforseo-ledger.json
-Set CLAUDE_SEO_CONFIG_DIR to point both somewhere else (used by the tests).
+Config: ~/.config/codex-seo/dataforseo-costs.json
+Ledger: ~/.config/codex-seo/dataforseo-ledger.json
+Set CODEX_SEO_CONFIG_DIR to point both somewhere else (used by the tests).
 
 Usage:
     python dataforseo_costs.py estimate <endpoint> [--count N]
@@ -22,7 +22,7 @@ Usage:
     python dataforseo_costs.py reset
 
 Original concept: Matej Marjanovic (Pro Hub Challenge)
-Security fixes: config path corrected to ~/.config/claude-seo/
+Security fixes: config path corrected to ~/.config/codex-seo/
 """
 
 import argparse
@@ -45,10 +45,10 @@ except ImportError:
     msvcrt = None
 
 # ----- paths -----
-# CLAUDE_SEO_CONFIG_DIR lets tests (and anyone running an isolated budget) point
+# CODEX_SEO_CONFIG_DIR lets tests (and anyone running an isolated budget) point
 # the ledger somewhere other than the real one. Resolved at import.
 CONFIG_DIR = Path(
-    os.environ.get("CLAUDE_SEO_CONFIG_DIR") or Path.home() / ".config" / "claude-seo"
+    os.environ.get("CODEX_SEO_CONFIG_DIR") or Path.home() / ".config" / "codex-seo"
 )
 CONFIG_FILE = CONFIG_DIR / "dataforseo-costs.json"
 LEDGER_FILE = CONFIG_DIR / "dataforseo-ledger.json"

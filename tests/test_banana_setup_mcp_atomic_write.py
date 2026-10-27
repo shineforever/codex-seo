@@ -1,15 +1,14 @@
-"""Regression tests for setup_mcp.py's atomic ~/.claude.json write.
+"""Regression tests for setup_mcp.py's atomic ~/.codex/config.toml write.
 
-~/.claude.json is shared with Claude Code and other extension installers, so
-save_settings() must never leave it truncated or half-written. It stages the
-write to a temp file in the same directory and swaps it into place with
-os.replace.
+~/.codex/config.toml is shared with Codex CLI and other extension
+installers, so the write must never leave it truncated or half-written.
+setup_mcp.py stages the write to a temp file in the same directory and
+swaps it into place with os.replace, editing only its own marker block.
 """
 
 from __future__ import annotations
 
 import importlib.util
-import json
 from pathlib import Path
 
 import pytest
@@ -18,13 +17,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _load_module(monkeypatch, home: Path):
-    """Import setup_mcp.py fresh with HOME pointed at an isolated directory.
-
-    SETTINGS_PATH is computed at module-exec time from Path.home(), so HOME
-    must be patched before exec_module runs.
-    """
+    """Import setup_mcp.py fresh with HOME pointed at an isolated directory."""
     monkeypatch.setenv("HOME", str(home))
-    # Path.home() reads USERPROFILE on Windows, not HOME.
     monkeypatch.setenv("USERPROFILE", str(home))
     spec = importlib.util.spec_from_file_location(
         "banana_setup_mcp", REPO_ROOT / "extensions/banana/scripts/setup_mcp.py"
@@ -40,28 +34,28 @@ def test_setup_mcp_writes_config_with_no_leftover_temp_file(tmp_path, monkeypatc
 
     module.setup_mcp("dummy-api-key")
 
-    settings_path = tmp_path / ".claude.json"
+    settings_path = tmp_path / ".codex/config.toml"
     assert settings_path.exists()
-    data = json.loads(settings_path.read_text())
-    assert data["mcpServers"]["nanobanana-mcp"]["env"]["GOOGLE_AI_API_KEY"] == "dummy-api-key"
-    assert list(tmp_path.glob(".claude.json.*.tmp")) == []
+    blob = settings_path.read_text(encoding="utf-8")
+    assert "[mcp_servers.nanobanana-mcp]" in blob
+    assert 'GOOGLE_AI_API_KEY = "dummy-api-key"' in blob
+    assert list(tmp_path.glob(".codex/config.toml.*.tmp")) == []
 
 
-def test_save_settings_preserves_unrelated_keys_on_existing_file(tmp_path, monkeypatch):
-    (tmp_path / ".claude.json").write_text(
-        json.dumps({"unrelated": "keep-me", "mcpServers": {"other-mcp": {"command": "x"}}})
-    )
+def test_setup_mcp_preserves_unrelated_content_on_existing_file(tmp_path, monkeypatch):
+    config = tmp_path / ".codex/config.toml"
+    config.parent.mkdir(parents=True, exist_ok=True)
+    config.write_text('[mcp_servers.other]\ncommand = "x"\n', encoding="utf-8")
     module = _load_module(monkeypatch, tmp_path)
 
     module.setup_mcp("dummy-api-key")
 
-    data = json.loads((tmp_path / ".claude.json").read_text())
-    assert data["unrelated"] == "keep-me"
-    assert "other-mcp" in data["mcpServers"]
-    assert "nanobanana-mcp" in data["mcpServers"]
+    blob = config.read_text(encoding="utf-8")
+    assert "[mcp_servers.other]" in blob
+    assert "[mcp_servers.nanobanana-mcp]" in blob
 
 
-def test_save_settings_stages_temp_file_in_same_directory(tmp_path, monkeypatch):
+def test_setup_mcp_stages_temp_file_in_same_directory(tmp_path, monkeypatch):
     module = _load_module(monkeypatch, tmp_path)
     tmp_dirs_seen = []
     real_mkstemp = module.tempfile.mkstemp
@@ -73,22 +67,26 @@ def test_save_settings_stages_temp_file_in_same_directory(tmp_path, monkeypatch)
 
     monkeypatch.setattr(module.tempfile, "mkstemp", spy_mkstemp)
 
-    module.save_settings({"mcpServers": {}})
+    module.setup_mcp("dummy-api-key")
 
-    assert tmp_dirs_seen == [tmp_path]
-    assert (tmp_path / ".claude.json").exists()
+    assert tmp_dirs_seen == [tmp_path / ".codex"]
+    assert (tmp_path / ".codex/config.toml").exists()
 
 
-def test_save_settings_cleans_up_temp_file_and_leaves_original_on_failure(tmp_path, monkeypatch):
-    original = {"mcpServers": {}, "keep": "value"}
-    (tmp_path / ".claude.json").write_text(json.dumps(original))
+def test_setup_mcp_cleans_up_temp_file_and_leaves_original_on_failure(tmp_path, monkeypatch):
+    original = "[mcp_servers.other]\ncommand = \"x\"\n"
+    config = tmp_path / ".codex/config.toml"
+    config.parent.mkdir(parents=True, exist_ok=True)
+    config.write_text(original, encoding="utf-8")
     module = _load_module(monkeypatch, tmp_path)
 
-    class Unserializable:
-        pass
+    def explode(*args, **kwargs):
+        raise OSError("disk full")
 
-    with pytest.raises(TypeError):
-        module.save_settings({"bad": Unserializable()})
+    monkeypatch.setattr(module.os, "replace", explode)
 
-    assert json.loads((tmp_path / ".claude.json").read_text()) == original
-    assert list(tmp_path.glob(".claude.json.*.tmp")) == []
+    with pytest.raises(OSError):
+        module.setup_mcp("dummy-api-key")
+
+    assert config.read_text(encoding="utf-8") == original
+    assert list(tmp_path.glob(".codex/config.toml.*.tmp")) == []

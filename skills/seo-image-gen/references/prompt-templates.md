@@ -1,4 +1,4 @@
-# Proven Prompt Templates: Claude Banana
+# Proven Prompt Templates: Banana
 
 > Split from `prompt-engineering.md`. Load it when you need a ready-made template for a use case.
 

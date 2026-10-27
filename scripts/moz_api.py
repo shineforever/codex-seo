@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Moz Link Explorer API client for Claude SEO.
+Moz Link Explorer API client for Codex SEO.
 
 Queries the Moz v2 REST API for Domain Authority, Page Authority,
 Spam Score, link counts, and referring domain data. Uses a conservative
@@ -44,7 +44,7 @@ MOZ_BASE = "https://api.moz.com"
 
 # Conservative default delay; verify current Moz plan limits.
 RATE_LIMIT_DELAY = 10
-RATE_LIMIT_FILE = os.path.expanduser("~/.cache/claude-seo/moz_last_request.lock")
+RATE_LIMIT_FILE = os.path.expanduser("~/.cache/codex-seo/moz_last_request.lock")
 
 
 def _moz_basic_auth_header(api_key: str) -> str | None:
@@ -110,7 +110,7 @@ def _moz_request(path: str, body: dict, api_key: str) -> dict:
 
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "ClaudeSEO/1.8.0",
+        "User-Agent": "CodexSEO/1.8.0",
     }
     basic_auth = _moz_basic_auth_header(api_key)
     if basic_auth:
@@ -346,7 +346,7 @@ def get_top_pages(domain: str, api_key: str, limit: int = 50) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Moz Link Explorer API client for Claude SEO"
+        description="Moz Link Explorer API client for Codex SEO"
     )
     parser.add_argument(
         "command",

@@ -1,11 +1,11 @@
-# Claude SEO Installer for Windows
+# Codex SEO Installer for Windows
 # PowerShell installation script
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "|   Claude SEO - Installer             |" -ForegroundColor Cyan
-Write-Host "|   Claude Code SEO Skill              |" -ForegroundColor Cyan
+Write-Host "|   Codex SEO - Installer             |" -ForegroundColor Cyan
+Write-Host "|   Codex CLI SEO Skill              |" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -17,8 +17,8 @@ $script:SeenPython = @()
 
 function Resolve-Python {
     # An override must be supported; it is never silently replaced.
-    if ($env:CLAUDE_SEO_PYTHON) {
-        return Test-PythonCandidate -Exe $env:CLAUDE_SEO_PYTHON -Args @()
+    if ($env:CODEX_SEO_PYTHON) {
+        return Test-PythonCandidate -Exe $env:CODEX_SEO_PYTHON -Args @()
     }
 
     # The default interpreter first, so an existing runtime keeps its Python.
@@ -112,10 +112,10 @@ $python = Resolve-Python
 if ($null -eq $python) {
     $found = 'no Python'
     if ($script:SeenPython.Count -gt 0) { $found = $script:SeenPython -join ', ' }
-    if ($env:CLAUDE_SEO_PYTHON) {
-        Write-Host "[x] CLAUDE_SEO_PYTHON must be Python 3.$MinMinor to 3.$MaxMinor. Found: $found." -ForegroundColor Red
+    if ($env:CODEX_SEO_PYTHON) {
+        Write-Host "[x] CODEX_SEO_PYTHON must be Python 3.$MinMinor to 3.$MaxMinor. Found: $found." -ForegroundColor Red
     } else {
-        Write-Host "[x] Claude SEO needs Python 3.$MinMinor to 3.$MaxMinor. Found: $found. Install Python 3.$MaxMinor from python.org or set CLAUDE_SEO_PYTHON." -ForegroundColor Red
+        Write-Host "[x] Codex SEO needs Python 3.$MinMinor to 3.$MaxMinor. Found: $found. Install Python 3.$MaxMinor from python.org or set CODEX_SEO_PYTHON." -ForegroundColor Red
     }
     exit 1
 }
@@ -137,54 +137,66 @@ try {
 }
 
 # Set paths
-$SkillDir = "$env:USERPROFILE\.claude\skills\seo"
-$AgentDir = "$env:USERPROFILE\.claude\agents"
-$RepoUrl = "https://github.com/AgriciDaniel/claude-seo"
-# Pin to a specific release tag to prevent silent updates from main.
-# This default MUST be bumped on every release. CI guard
-# (tests/test_manifest_consistency.py) enforces this matches plugin.json.
-# Override: $env:CLAUDE_SEO_TAG = 'main'; .\install.ps1
-$RepoTag = if ($env:CLAUDE_SEO_TAG) { $env:CLAUDE_SEO_TAG } else { 'v2.5.0' }
+$SkillsRoot = "$env:USERPROFILE\.agents\skills"
+$SkillDir = "$SkillsRoot\seo"
+$AgentDir = "$SkillsRoot\seo\agents"
+$PromptDir = "$env:USERPROFILE\.codex\prompts"
+# Set this to your fork before distributing. Running install.ps1 from inside
+# a clone of this repository uses the local checkout instead of the network.
+$RepoUrl = if ($env:CODEX_SEO_REPO_URL) { $env:CODEX_SEO_REPO_URL } else { 'https://github.com/zhtyyx/codex-seo' }
+# Override: $env:CODEX_SEO_TAG = 'main'; .\install.ps1
+$RepoTag = if ($env:CODEX_SEO_TAG) { $env:CODEX_SEO_TAG } else { 'main' }
 
 # Create directories
 New-Item -ItemType Directory -Force -Path $SkillDir | Out-Null
 New-Item -ItemType Directory -Force -Path $AgentDir | Out-Null
+New-Item -ItemType Directory -Force -Path $PromptDir | Out-Null
 
-# Clone to temp directory
-$TempDir = Join-Path $env:TEMP "claude-seo-install"
-if (Test-Path $TempDir) {
-    Remove-Item -Recurse -Force $TempDir
+# Source: local checkout when run from inside a clone, else a temp clone.
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+if (Test-Path (Join-Path $ScriptDir 'skills\seo\SKILL.md')) {
+    $TempDir = $null
+    $SourceDir = $ScriptDir
+    Write-Host ">> Installing from local checkout: $SourceDir" -ForegroundColor Yellow
+} else {
+    $TempDir = Join-Path $env:TEMP "codex-seo-install"
+    if (Test-Path $TempDir) {
+        Remove-Item -Recurse -Force $TempDir
+    }
+    $SourceDir = $TempDir
 }
 
-$keepTemp = ($env:CLAUDE_SEO_KEEP_TEMP -eq '1')
+$keepTemp = ($env:CODEX_SEO_KEEP_TEMP -eq '1')
 
 try {
-    Write-Host ">> Downloading Claude SEO ($RepoTag)..." -ForegroundColor Yellow
-    $clone = Invoke-External -Exe 'git' -Args @('clone','--depth','1','--branch',$RepoTag,$RepoUrl,$TempDir) -Quiet
-    if ($clone.ExitCode -ne 0) {
-        throw "git clone failed. Output:`n$($clone.Output -join "`n")"
+    if ($null -ne $TempDir) {
+        Write-Host ">> Downloading Codex SEO ($RepoTag)..." -ForegroundColor Yellow
+        $clone = Invoke-External -Exe 'git' -Args @('clone','--depth','1','--branch',$RepoTag,$RepoUrl,$TempDir) -Quiet
+        if ($clone.ExitCode -ne 0) {
+            throw "git clone failed. Set CODEX_SEO_REPO_URL to your fork, or run install.ps1 from inside a clone."
+        }
     }
 
     # Copy skill files
     Write-Host "=> Installing skill files..." -ForegroundColor Yellow
-    $skillSource = Join-Path $TempDir 'skills\seo'
+    $skillSource = Join-Path $SourceDir 'skills\seo'
     if (-not (Test-Path $skillSource)) {
         throw "Could not find skill source folder in repo clone."
     }
     Copy-Item -Recurse -Force (Join-Path $skillSource '*') $SkillDir
 
     # Copy sub-skills
-    $SkillsPath = "$TempDir\skills"
+    $SkillsPath = "$SourceDir\skills"
     if (Test-Path $SkillsPath) {
         Get-ChildItem -Directory $SkillsPath | ForEach-Object {
-            $target = "$env:USERPROFILE\.claude\skills\$($_.Name)"
+            $target = "$env:USERPROFILE\.agents\skills\$($_.Name)"
             New-Item -ItemType Directory -Force -Path $target | Out-Null
             Copy-Item -Recurse -Force "$($_.FullName)\*" $target
         }
     }
 
     # Copy schema templates
-    $SchemaPath = "$TempDir\schema"
+    $SchemaPath = "$SourceDir\schema"
     if (Test-Path $SchemaPath) {
         $SkillSchema = "$SkillDir\schema"
         New-Item -ItemType Directory -Force -Path $SkillSchema | Out-Null
@@ -193,7 +205,7 @@ try {
 
     # Copy deterministic data files consumed by bundled scripts such as
     # seo_updates.py. Keep the repository-relative data\ layout intact.
-    $DataPath = "$TempDir\data"
+    $DataPath = "$SourceDir\data"
     if (Test-Path $DataPath) {
         $SkillData = "$SkillDir\data"
         New-Item -ItemType Directory -Force -Path $SkillData | Out-Null
@@ -201,7 +213,7 @@ try {
     }
 
     # Copy reference docs
-    $PdfPath = "$TempDir\pdf"
+    $PdfPath = "$SourceDir\pdf"
     if (Test-Path $PdfPath) {
         $SkillPdf = "$SkillDir\pdf"
         New-Item -ItemType Directory -Force -Path $SkillPdf | Out-Null
@@ -210,13 +222,13 @@ try {
 
     # Copy agents
     Write-Host "=> Installing subagents..." -ForegroundColor Yellow
-    $AgentsPath = Join-Path $TempDir 'agents'
+    $AgentsPath = Join-Path $SourceDir 'agents'
     if (Test-Path $AgentsPath) {
         Copy-Item -Force (Join-Path $AgentsPath '*.md') $AgentDir -ErrorAction SilentlyContinue
     }
 
     # Copy shared scripts
-    $ScriptsPath = "$TempDir\scripts"
+    $ScriptsPath = "$SourceDir\scripts"
     if (Test-Path $ScriptsPath) {
         $SkillScripts = "$SkillDir\scripts"
         New-Item -ItemType Directory -Force -Path $SkillScripts | Out-Null
@@ -226,24 +238,15 @@ try {
     # Copy the stable launcher used by skill and agent instructions. It ships in
     # scripts/ (never a top-level bin/, which hosted marketplaces reject) and
     # resolves runtime.py as a sibling, so it lands beside the copied scripts.
-    $LauncherSource = Join-Path $ScriptsPath 'claude-seo'
+    $LauncherSource = Join-Path $ScriptsPath 'codex-seo'
     $SkillLauncherDir = Join-Path $SkillDir 'scripts'
     if (Test-Path $LauncherSource) {
         New-Item -ItemType Directory -Force -Path $SkillLauncherDir | Out-Null
-        Copy-Item -Force $LauncherSource (Join-Path $SkillLauncherDir 'claude-seo')
-    }
-
-    # Copy hooks
-    Write-Host "  Note: hook enforcement requires plugin install; manual hook copy is best-effort." -ForegroundColor Yellow
-    $HooksPath = "$TempDir\hooks"
-    if (Test-Path $HooksPath) {
-        $SkillHooks = "$SkillDir\hooks"
-        New-Item -ItemType Directory -Force -Path $SkillHooks | Out-Null
-        Copy-Item -Recurse -Force "$HooksPath\*" $SkillHooks
+        Copy-Item -Force $LauncherSource (Join-Path $SkillLauncherDir 'codex-seo')
     }
 
     # Copy extensions (optional add-ons: dataforseo, banana)
-    $ExtensionsPath = Join-Path $TempDir 'extensions'
+    $ExtensionsPath = Join-Path $SourceDir 'extensions'
     if (Test-Path $ExtensionsPath) {
         Write-Host "=> Installing extensions..." -ForegroundColor Yellow
         Get-ChildItem -Directory $ExtensionsPath | ForEach-Object {
@@ -253,7 +256,7 @@ try {
             $extSkills = Join-Path $extDir 'skills'
             if (Test-Path $extSkills) {
                 Get-ChildItem -Directory $extSkills | ForEach-Object {
-                    $target = "$env:USERPROFILE\.claude\skills\$($_.Name)"
+                    $target = "$env:USERPROFILE\.agents\skills\$($_.Name)"
                     New-Item -ItemType Directory -Force -Path $target | Out-Null
                     Copy-Item -Recurse -Force "$($_.FullName)\*" $target
                 }
@@ -281,26 +284,27 @@ try {
     }
 
     # Copy requirements.txt to skill dir for retry
-    $reqFile = Join-Path $TempDir 'requirements.txt'
+    $reqFile = Join-Path $SourceDir 'requirements.txt'
     $installedReqFile = Join-Path $SkillDir 'requirements.txt'
     if (Test-Path $reqFile) {
         Copy-Item -Force $reqFile $installedReqFile
     }
-    $pluginManifest = Join-Path $TempDir '.claude-plugin\plugin.json'
-    if (Test-Path $pluginManifest) {
-        Copy-Item -Force $pluginManifest (Join-Path $SkillDir 'runtime-plugin.json')
+    # Install the /seo custom prompt
+    $promptSource = Join-Path $SourceDir 'codex-prompts\seo.md'
+    if (Test-Path $promptSource) {
+        Copy-Item -Force $promptSource (Join-Path $PromptDir 'seo.md')
     }
 
-    # Manual installs have no ${CLAUDE_PLUGIN_ROOT}. Rewrite the canonical
+    # Manual installs have no ${CODEX_SEO_ROOT}. Rewrite the canonical
     # launcher token in installed Markdown to the absolute installed path.
-    # Claude Code's Bash tool expands $HOME on Windows as well as Unix. The
+    # Codex CLI's Bash tool expands $HOME on Windows as well as Unix. The
     # replacement consumes the plugin-root token, so a second pass is a no-op.
-    $pluginRunner = '"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run'
-    $manualRunner = '"$HOME/.claude/skills/seo/scripts/claude-seo" run'
+    $pluginRunner = '"${CODEX_SEO_ROOT}/scripts/codex-seo" run'
+    $manualRunner = '"$HOME/.agents/skills/seo/scripts/codex-seo" run'
     $installedDocs = @()
     Get-ChildItem -Path $SkillsPath -Directory | ForEach-Object {
         $sourceRoot = $_.FullName
-        $targetRoot = "$env:USERPROFILE\.claude\skills\$($_.Name)"
+        $targetRoot = "$env:USERPROFILE\.agents\skills\$($_.Name)"
         $installedDocs += Get-ChildItem -Path $sourceRoot -Recurse -File -Filter '*.md' | ForEach-Object {
             $relative = $_.FullName.Substring($sourceRoot.Length).TrimStart('\','/')
             Get-Item (Join-Path $targetRoot $relative) -ErrorAction SilentlyContinue
@@ -311,7 +315,7 @@ try {
         $extSkills = Join-Path $_.FullName 'skills'
         Get-ChildItem -Path $extSkills -Directory -ErrorAction SilentlyContinue | ForEach-Object {
             $sourceRoot = $_.FullName
-            $targetRoot = "$env:USERPROFILE\.claude\skills\$($_.Name)"
+            $targetRoot = "$env:USERPROFILE\.agents\skills\$($_.Name)"
             $installedDocs += Get-ChildItem -Path $sourceRoot -Recurse -File -Filter '*.md' | ForEach-Object {
                 $relative = $_.FullName.Substring($sourceRoot.Length).TrimStart('\','/')
                 Get-Item (Join-Path $targetRoot $relative) -ErrorAction SilentlyContinue
@@ -336,15 +340,15 @@ try {
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
     $installedDocs | ForEach-Object {
         $text = [System.IO.File]::ReadAllText($_.FullName)
-        $pluginSetup = '"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" setup'
-        $pluginDoctor = '"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" doctor'
-        $manualSetup = '"$HOME/.claude/skills/seo/scripts/claude-seo" setup'
-        $manualDoctor = '"$HOME/.claude/skills/seo/scripts/claude-seo" doctor'
+        $pluginSetup = '"${CODEX_SEO_ROOT}/scripts/codex-seo" setup'
+        $pluginDoctor = '"${CODEX_SEO_ROOT}/scripts/codex-seo" doctor'
+        $manualSetup = '"$HOME/.agents/skills/seo/scripts/codex-seo" setup'
+        $manualDoctor = '"$HOME/.agents/skills/seo/scripts/codex-seo" doctor'
         $updated = $text.Replace($pluginRunner, $manualRunner)
         $updated = $updated.Replace($pluginSetup, $manualSetup)
         $updated = $updated.Replace($pluginDoctor, $manualDoctor)
         # Read-tool paths need the absolute skills directory, not a variable.
-        $updated = $updated.Replace('${CLAUDE_PLUGIN_ROOT}/skills/', (($env:USERPROFILE -replace '\\', '/') + '/.claude/skills/'))
+        $updated = $updated.Replace('${CODEX_SEO_ROOT}/skills/', (($env:USERPROFILE -replace '\\', '/') + '/.agents/skills/'))
         if ($updated -ne $text) {
             [System.IO.File]::WriteAllText($_.FullName, $updated, $utf8NoBom)
         }
@@ -369,16 +373,17 @@ try {
     }
     throw
 } finally {
-    if (-not $keepTemp -and (Test-Path $TempDir)) {
+    if ($null -ne $TempDir -and -not $keepTemp -and (Test-Path $TempDir)) {
         Remove-Item -Recurse -Force $TempDir
     }
 }
 
 Write-Host ""
-Write-Host "[+] Claude SEO installed successfully!" -ForegroundColor Green
+Write-Host "[+] Codex SEO installed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Usage:" -ForegroundColor Cyan
-Write-Host "  1. Start Claude Code:  claude"
+Write-Host "  1. Start Codex CLI:  codex"
 Write-Host "  2. Run commands:       /seo audit https://example.com"
 Write-Host ""
-Write-Host "Python deps location: $installedReqFile" -ForegroundColor Gray
+Write-Host "Skills location: $SkillsRoot" -ForegroundColor Gray
+Write-Host "Custom prompt: $PromptDir\seo.md" -ForegroundColor Gray

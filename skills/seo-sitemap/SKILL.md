@@ -4,8 +4,6 @@ description: >
   Analyze existing XML sitemaps or generate new ones with industry templates.
   Validates format, URLs, and structure. Use when user says "sitemap",
   "generate sitemap", "sitemap issues", or "XML sitemap".
-user-invocable: true
-argument-hint: "[url or generate]"
 license: MIT
 metadata:
   author: AgriciDaniel
@@ -20,7 +18,7 @@ metadata:
 Discover candidates before reporting a sitemap missing:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run sitemap_discovery.py <url> --json
+"${CODEX_SEO_ROOT}/scripts/codex-seo" run sitemap_discovery.py <url> --json
 ```
 
 The helper reads every bounded `Sitemap:` declaration in robots.txt, validates

@@ -181,12 +181,13 @@ def test_extension_skillmd_has_required_frontmatter(
     assert f"name: {skill_dir}" in head, f"{name}: frontmatter name must be {skill_dir}"
     assert "description:" in head, f"{name}: missing description"
     assert "metadata:" in head, f"{name}: missing metadata block"
-    import json as _json
-    _expected = _json.loads(
-        (_REPO_ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8")
-    )["version"]
+    import re as _re
+    _pyproject = (_REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    _m = _re.search(r'^version\s*=\s*"([^"]+)"', _pyproject, _re.MULTILINE)
+    assert _m, "pyproject.toml has no version"
+    _expected = _m.group(1)
     assert f'version: "{_expected}"' in head, (
-        f"{name}: SKILL.md must declare version {_expected} (from plugin.json)"
+        f"{name}: SKILL.md must declare version {_expected} (from pyproject.toml)"
     )
 
 

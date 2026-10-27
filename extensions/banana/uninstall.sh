@@ -5,35 +5,25 @@ main() {
     echo "→ Uninstalling Banana Image Generation extension..."
 
     # Remove skill (includes copied scripts and references)
-    rm -rf "${HOME}/.claude/skills/seo-image-gen"
+    rm -rf "${HOME}/.agents/skills/seo-image-gen"
 
     # Remove agent
-    rm -f "${HOME}/.claude/agents/seo-image-gen.md"
+    rm -f "${HOME}/.agents/skills/seo/agents/seo-image-gen.md"
 
     # Ask before removing MCP server (user may use standalone banana skill)
-    MCP_CONFIG_FILE="${HOME}/.claude.json"
+    MCP_CONFIG_FILE="${HOME}/.codex/config.toml"
     if [ -f "${MCP_CONFIG_FILE}" ]; then
         # Check if standalone banana skill still exists
-        if [ -d "${HOME}/.claude/skills/banana" ]; then
-            echo "  ℹ  Standalone banana skill detected at ~/.claude/skills/banana/"
-            echo "  ℹ  Keeping nanobanana-mcp in ~/.claude.json (used by standalone skill)"
+        if [ -d "${HOME}/.agents/skills/banana" ]; then
+            echo "  ℹ  Standalone banana skill detected at ~/.agents/skills/banana/"
+            echo "  ℹ  Keeping nanobanana-mcp in ~/.codex/config.toml (used by standalone skill)"
         else
             # No standalone skill, safe to remove MCP
-            python3 - "${MCP_CONFIG_FILE}" <<'PY' 2>/dev/null || echo "  ⚠  Could not auto-remove MCP config. Remove 'nanobanana-mcp' from ~/.claude.json manually."
-import json, os, sys
-settings_path = sys.argv[1]
-with open(settings_path, 'r') as f:
-    settings = json.load(f)
-if 'mcpServers' in settings and 'nanobanana-mcp' in settings['mcpServers']:
-    del settings['mcpServers']['nanobanana-mcp']
-    if not settings['mcpServers']:
-        del settings['mcpServers']
-    with open(settings_path, 'w') as f:
-        json.dump(settings, f, indent=2)
-    print('  ✓ Removed nanobanana-mcp from ~/.claude.json')
-else:
-    print('  ✓ No nanobanana-mcp entry in ~/.claude.json')
-PY
+HELPER="${HOME}/.agents/skills/seo/scripts/codex_config.py"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+[ -f "${HELPER}" ] || HELPER="${SCRIPT_DIR}/../../scripts/codex_config.py"
+python3 "${HELPER}" remove nanobanana-mcp --config-path "${MCP_CONFIG_FILE}" \
+    || echo "  ⚠  Could not auto-remove MCP config. Remove 'nanobanana-mcp' from ${MCP_CONFIG_FILE} manually."
         fi
     fi
 

@@ -836,7 +836,7 @@ def audit_ua_matrix(url: str) -> tuple[list, dict]:
 
 def audit_not_found(root: str) -> tuple[list, dict]:
     """Does an unknown URL return a real 404? Catch-all 200s break discovery files."""
-    probe = f"{root}/claude-seo-404-probe-{os.urandom(4).hex()}"
+    probe = f"{root}/codex-seo-404-probe-{os.urandom(4).hex()}"
     rec = fetch(probe)
     data = {"probe_url": probe, "status": rec["status"], "content_type": _ctype(rec)}
     catch_all = rec["status"] == 200

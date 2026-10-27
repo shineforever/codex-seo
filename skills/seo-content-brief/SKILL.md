@@ -7,8 +7,6 @@ description: >
   Use when user says "content brief", "write a brief", "content outline",
   "blog brief", "service page brief", "brief for", "writing brief",
   "content plan", or "outline for".
-user-invocable: true
-argument-hint: "[url-or-keyword] [page-type]"
 license: MIT
 metadata:
   author: puneetindersingh

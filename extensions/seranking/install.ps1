@@ -1,15 +1,15 @@
-# Claude SEO - SE Ranking extension installer (Windows / PowerShell).
+# Codex SEO - SE Ranking extension installer (Windows / PowerShell).
 $ErrorActionPreference = "Stop"
 
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     throw "Python 3 is required."
 }
 
-$SkillDir = Join-Path $HOME ".claude/skills"
-$SettingsJson = Join-Path $HOME ".claude/settings.json"
+$SkillDir = Join-Path $HOME ".agents/skills"
+$SettingsJson = Join-Path $HOME ".codex/config.toml"
 
 if (-not (Test-Path (Join-Path $SkillDir "seo"))) {
-    throw "claude-seo base plugin not installed."
+    throw "codex-seo base plugin not installed."
 }
 
 $Key = Read-Host "SE Ranking API key" -AsSecureString
@@ -22,23 +22,13 @@ New-Item -ItemType Directory -Path $SkillTarget -Force | Out-Null
 Copy-Item -Path (Join-Path $SourceDir "skills/seo-seranking/SKILL.md") `
           -Destination (Join-Path $SkillTarget "SKILL.md") -Force
 
-$pyScript = @"
-import json, os, sys, tempfile
-path, key = sys.argv[1], os.environ['CLAUDE_SEO_SECRET']
-data = {}
-if os.path.exists(path):
-    try: data = json.load(open(path))
-    except ValueError: sys.exit('x ' + path + ' is not valid JSON. Nothing was changed; fix it and rerun.')
-data.setdefault('env', {})['SERANKING_API_KEY'] = key
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path) or '.', prefix='.settings.', suffix='.json')
-with os.fdopen(fd, 'w') as fh:
-    json.dump(data, fh, indent=2)
-os.replace(tmp, path)
-"@
-$env:CLAUDE_SEO_SECRET = $Plain
+$Helper = Join-Path $HOME ".agents/skills/seo/scripts/codex_config.py"
+if (-not (Test-Path $Helper)) { $Helper = Join-Path (Split-Path -Parent (Split-Path -Parent $SourceDir)) "scripts/codex_config.py" }
+if (-not (Test-Path $Helper)) { throw "codex_config.py not found (reinstall codex-seo)" }
+$env:SERANKING_API_KEY = $Plain
 try {
-    $pyScript | python - $SettingsJson
+    python $Helper env-set SERANKING_API_KEY --pass-from SERANKING_API_KEY
     # A native command's non-zero exit does not throw, even with Stop.
     if ($LASTEXITCODE -ne 0) { throw "Nothing was saved (python exited $LASTEXITCODE). See the message above." }
-} finally { Remove-Item Env:CLAUDE_SEO_SECRET -ErrorAction SilentlyContinue }
+} finally { Remove-Item Env:SERANKING_API_KEY -ErrorAction SilentlyContinue }
 Write-Host "Done. Try: /seo seranking ai-visibility brandname"

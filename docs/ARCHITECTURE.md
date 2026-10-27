@@ -2,14 +2,14 @@
 
 ## Overview
 
-Claude SEO follows Anthropic's official Claude Code skill specification with a modular, multi-skill architecture.
+Codex SEO follows Anthropic's official Codex CLI skill specification with a modular, multi-skill architecture.
 
 ## Directory Structure
 
 The plugin ships 26 sub-skills (22 core + 1 orchestrator + 1 framework integration + 2 extension mirrors) and 19 sub-agents (16 core + 1 framework integration + 2 extension mirrors).
 
 ```
-~/.claude/plugins/.../claude-seo/
+~/.agents/skills/.../codex-seo/
 ├── skills/
 │   ├── seo/                    # Main orchestrator
 │   │   ├── SKILL.md
@@ -226,28 +226,28 @@ User Request (e.g., /seo page)
 
 ### Managed Python runtime
 
-Bundled tools are dispatched through `scripts/claude-seo` and
+Bundled tools are dispatched through `scripts/codex-seo` and
 `scripts/runtime.py`, never through a working-directory-relative Python command.
 The launcher resolves a Python in the supported range (3.11 to 3.14, set by
-`MIN_PYTHON` and `MAX_PYTHON` in `runtime.py`): `CLAUDE_SEO_PYTHON` if set,
+`MIN_PYTHON` and `MAX_PYTHON` in `runtime.py`): `CODEX_SEO_PYTHON` if set,
 then the default interpreter if it is in range, then the newest versioned one.
 The standard-library runtime provides three operations: `run`, `setup`, and
 read-only `doctor`.
 
 The launcher lives in `scripts/` beside `runtime.py`, which it resolves as a
-sibling. A top-level `bin/` directory is not allowed: the claude.ai-hosted
-marketplace rejects such a plugin with `marketplace_sync_bin_directory_not_allowed`.
-Skills and agents therefore call the launcher by its plugin-relative path,
-`"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run <script.py>`, which Claude Code
-expands in skill body content, in `allowed-tools` Bash rules, and as an
-environment variable for hook processes. The quoting keeps the command correct
-when the plugin root contains spaces. Manual installers (`install.sh`,
-`install.ps1`) copy the launcher to `~/.claude/skills/seo/scripts/claude-seo`
+sibling. Skills and agents call the launcher by the canonical token
+`"${CODEX_SEO_ROOT}/scripts/codex-seo" run <script.py>`, where
+`${CODEX_SEO_ROOT}` is the repository root inside a clone. Codex does not
+expand the token itself: `install.sh`/`install.ps1` rewrite it to the absolute
+installed path, `"$HOME/.agents/skills/seo/scripts/codex-seo"`, when they copy
+the skills to `~/.agents/skills/`. The quoting keeps the command correct
+when the root contains spaces. Manual installers (`install.sh`,
+`install.ps1`) copy the launcher to `~/.agents/skills/seo/scripts/codex-seo`
 and rewrite that canonical token to the absolute path in every Markdown file
 they install, because a manual install has no plugin root.
 
-Plugin environments live under persistent `CLAUDE_PLUGIN_DATA`. Manual installs
-keep the compatible `~/.claude/skills/seo/.venv` location. A state marker records
+Plugin environments live under persistent `CODEX_SEO_DATA`. Manual installs
+keep the compatible `~/.agents/skills/seo/.venv` location. A state marker records
 the runtime schema, requirements SHA-256, Python major and minor version, public
 plugin version, and browser state. Requirements, runtime-schema, or Python ABI
 changes require explicit setup; a version-only difference remains compatible and
@@ -348,5 +348,5 @@ extensions/
 3. Own `uninstall.sh` (and `uninstall.ps1` where present) that reverses installation
 4. Installs the sub-skill mirror to the plugin's skill directory
 5. Installs the sub-agent mirror to the plugin's agent directory (extensions that ship one; lighter extensions are skill-only)
-6. Merges MCP config into `~/.claude/settings.json` non-destructively
+6. Merges MCP config into `~/.codex/settings.json` non-destructively
 7. MCP server versions are pinned (`@<version>`) for supply-chain stability

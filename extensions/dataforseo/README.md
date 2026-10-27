@@ -1,10 +1,10 @@
-# DataForSEO Extension for Claude SEO
+# DataForSEO Extension for Codex SEO
 
 Live SEO data via the [DataForSEO MCP server](https://github.com/dataforseo/mcp-server-typescript). Adds 23 data commands across 9 API modules: SERP analysis, keyword research, backlinks, on-page analysis, competitor analysis, content analysis, business listings, AI visibility checking, and LLM mention tracking.
 
 ## Prerequisites
 
-- [Claude SEO](https://github.com/AgriciDaniel/claude-seo) installed
+- [Codex SEO](https://github.com/zhtyyx/codex-seo) installed
 - Node.js 20+
 - [DataForSEO account](https://app.dataforseo.com/register) with API credentials
 
@@ -13,23 +13,23 @@ Live SEO data via the [DataForSEO MCP server](https://github.com/dataforseo/mcp-
 ### Unix/macOS/Linux
 
 ```bash
-git clone https://github.com/AgriciDaniel/claude-seo.git
-cd claude-seo
+git clone https://github.com/zhtyyx/codex-seo.git
+cd codex-seo
 ./extensions/dataforseo/install.sh
 ```
 
 ### Windows
 
 ```powershell
-git clone https://github.com/AgriciDaniel/claude-seo.git
-cd claude-seo
+git clone https://github.com/zhtyyx/codex-seo.git
+cd codex-seo
 .\extensions\dataforseo\install.ps1
 ```
 
 The installer will:
 1. Prompt for your DataForSEO username and password
 2. Install the skill and agent files
-3. Configure the MCP server in `~/.claude.json`
+3. Configure the MCP server in `~/.codex/config.toml`
 4. Pre-download the `dataforseo-mcp-server` npm package
 
 ## Commands
@@ -119,9 +119,9 @@ New accounts include a free trial balance. See [DataForSEO pricing](https://data
 
 The extension includes a custom `field-config.json` that reduces API response sizes by ~75%, keeping only SEO-relevant fields. This saves tokens and speeds up analysis.
 
-## Integration with Claude SEO
+## Integration with Codex SEO
 
-When installed, other Claude SEO skills automatically detect DataForSEO availability and use live data:
+When installed, other Codex SEO skills automatically detect DataForSEO availability and use live data:
 
 - **`/seo audit`**: Uses real SERP, backlink, and on-page data
 - **`/seo technical`**: Uses on-page analysis for real technical data
@@ -133,19 +133,19 @@ When installed, other Claude SEO skills automatically detect DataForSEO availabi
 
 ### MCP server not connecting
 
-1. Check credentials: `cat ~/.claude.json | grep DATAFORSEO`
+1. Check credentials: `cat ~/.codex/config.toml | grep DATAFORSEO`
 2. Test manually: `npx -y dataforseo-mcp-server`
 3. Re-run installer: `./extensions/dataforseo/install.sh`
 
 ### API errors
 
-- **401 Unauthorized**: Check username/password in ~/.claude.json
+- **401 Unauthorized**: Check username/password in ~/.codex/config.toml
 - **402 Payment Required**: Add credits at [app.dataforseo.com](https://app.dataforseo.com)
 - **429 Rate Limited**: Wait and retry (DataForSEO has per-second limits)
 
 ### Module not available
 
-If a specific command fails, check that the module is in `ENABLED_MODULES` in your ~/.claude.json. All 9 modules should be listed.
+If a specific command fails, check that the module is in `ENABLED_MODULES` in your ~/.codex/config.toml. All 9 modules should be listed.
 
 ## Uninstall
 
@@ -161,10 +161,10 @@ If a specific command fails, check that the module is in `ENABLED_MODULES` in yo
 .\extensions\dataforseo\uninstall.ps1
 ```
 
-This removes the skill, agent, field config, and MCP server entry from ~/.claude.json.
+This removes the skill, agent, field config, and MCP server entry from ~/.codex/config.toml.
 
 ## Links
 
 - [DataForSEO API Docs](https://docs.dataforseo.com/)
 - [DataForSEO MCP Server](https://github.com/dataforseo/mcp-server-typescript)
-- [Claude SEO](https://github.com/AgriciDaniel/claude-seo)
+- [Codex SEO](https://github.com/zhtyyx/codex-seo)

@@ -39,7 +39,7 @@ def _agent_path(name: str) -> Path:
     """Resolve an audit subagent to its file, core tree first, then extensions.
 
     Extension-supplied agents (``seo-matomo``) ship under
-    ``extensions/<name>/agents/`` and are installed into ``~/.claude/agents/``
+    ``extensions/<name>/agents/`` and are installed into ``~/.agents/skills/seo/agents/``
     by the extension installer, so they carry the same turn-budget and
     early-write obligations as the core agents the orchestrator spawns.
     """

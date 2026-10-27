@@ -11,17 +11,12 @@ def _text(relative: str) -> str:
 
 def test_bash_installer_copies_google_update_data_beside_scripts() -> None:
     installer = _text("install.sh")
-    assert 'mkdir -p "${SKILL_DIR}/data"' in installer
-    assert (
-        'cp -r "${TEMP_DIR}/claude-seo/data/"* "${SKILL_DIR}/data/"'
-        in installer
-    )
+    assert '[ -d "${SRC_DIR}/data" ] && cp -R "${SRC_DIR}/data" "${SKILL_DIR}/"' in installer
 
 
 def test_powershell_installer_copies_google_update_data_beside_scripts() -> None:
     installer = _text("install.ps1")
-    assert '$DataPath = "$TempDir\\data"' in installer
-    assert '$SkillData = "$SkillDir\\data"' in installer
+    assert '$DataPath = "$SourceDir\\data"' in installer
     assert 'Copy-Item -Recurse -Force "$DataPath\\*" $SkillData' in installer
 
 
@@ -38,7 +33,7 @@ def test_google_updates_data_exists_at_installed_relative_path() -> None:
 def test_cross_skill_paths_resolve_outside_the_repo_checkout():
     """Agents and skills run with the user's project as the working directory,
     so a bare `skills/...` path never resolves there (#252). Plugin installs
-    substitute ${CLAUDE_PLUGIN_ROOT}; manual installs rewrite it to the
+    substitute ${CODEX_SEO_ROOT}; manual installs rewrite it to the
     absolute skills directory."""
     import re
 
@@ -49,6 +44,6 @@ def test_cross_skill_paths_resolve_outside_the_repo_checkout():
         for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if bare.search(line):
                 offenders.append(f"{path.relative_to(ROOT)}:{line_no}")
-    assert not offenders, "prefix with ${CLAUDE_PLUGIN_ROOT}/: " + ", ".join(offenders)
-    assert "${CLAUDE_PLUGIN_ROOT}/skills/#" in (ROOT / "install.sh").read_text(encoding="utf-8")
-    assert "'${CLAUDE_PLUGIN_ROOT}/skills/'" in (ROOT / "install.ps1").read_text(encoding="utf-8")
+    assert not offenders, "prefix with ${CODEX_SEO_ROOT}/: " + ", ".join(offenders)
+    assert "${CODEX_SEO_ROOT}/skills/#" in (ROOT / "install.sh").read_text(encoding="utf-8")
+    assert "'${CODEX_SEO_ROOT}/skills/'" in (ROOT / "install.ps1").read_text(encoding="utf-8")

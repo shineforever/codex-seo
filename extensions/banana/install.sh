@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Banana Image Generation Extension Installer for Claude SEO
+# Banana Image Generation Extension Installer for Codex SEO
 # Wraps everything in main() to prevent partial execution on network failure
 
 main() {
-    SKILL_DIR="${HOME}/.claude/skills/seo-image-gen"
-    AGENT_DIR="${HOME}/.claude/agents"
-    SEO_SKILL_DIR="${HOME}/.claude/skills/seo"
-    # MCP servers live in ~/.claude.json (the file `claude mcp add` writes).
-    # NOT ~/.claude/settings.json - `mcpServers` is not a key Claude Code reads
+    SKILL_DIR="${HOME}/.agents/skills/seo-image-gen"
+    AGENT_DIR="${HOME}/.agents/skills/seo/agents"
+    SEO_SKILL_DIR="${HOME}/.agents/skills/seo"
+    # MCP servers live in ~/.codex/config.toml (the file `codex mcp add` writes).
+    # NOT ~/.codex/settings.json - `mcpServers` is not a key Codex CLI reads
     # there, so entries written to settings.json silently never load.
-    MCP_CONFIG_FILE="${HOME}/.claude.json"
+    MCP_CONFIG_FILE="${HOME}/.codex/config.toml"
 
     echo "════════════════════════════════════════"
     echo "║  Banana Image Gen - SEO Extension    ║"
-    echo "║  For Claude SEO                      ║"
+    echo "║  For Codex SEO                      ║"
     echo "════════════════════════════════════════"
     echo ""
 
     # Check prerequisites
     if [ ! -d "${SEO_SKILL_DIR}" ]; then
-        echo "✗ Claude SEO is not installed."
-        echo "  Install it first: curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash"
+        echo "✗ Codex SEO is not installed."
+        echo "  Install it first: curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh | bash"
         exit 1
     fi
-    echo "✓ Claude SEO detected"
+    echo "✓ Codex SEO detected"
 
     if ! command -v node >/dev/null 2>&1; then
         echo "✗ Node.js is required but not installed."
@@ -57,26 +57,15 @@ main() {
         SOURCE_DIR="${SCRIPT_DIR}/extensions/banana"
     else
         echo "✗ Cannot find extension source files."
-        echo "  Run this script from the claude-seo repo: ./extensions/banana/install.sh"
+        echo "  Run this script from the codex-seo repo: ./extensions/banana/install.sh"
         exit 1
     fi
 
     # Check if nanobanana-mcp is already configured
     MCP_CONFIGURED=false
-    if [ -f "${MCP_CONFIG_FILE}" ]; then
-        if python3 - "${MCP_CONFIG_FILE}" <<'PY' 2>/dev/null; then
-import json, sys
-settings_path = sys.argv[1]
-with open(settings_path, 'r') as f:
-    settings = json.load(f)
-if 'mcpServers' in settings and 'nanobanana-mcp' in settings['mcpServers']:
-    sys.exit(0)
-else:
-    sys.exit(1)
-PY
-            MCP_CONFIGURED=true
-            echo "✓ nanobanana-mcp already configured in ~/.claude.json"
-        fi
+    if [ -f "${MCP_CONFIG_FILE}" ] && grep -q "^\[mcp_servers\.nanobanana-mcp\]" "${MCP_CONFIG_FILE}"; then
+        MCP_CONFIGURED=true
+        echo "✓ nanobanana-mcp already configured in ${MCP_CONFIG_FILE}"
     fi
 
     # If MCP not configured, prompt for API key
@@ -97,42 +86,13 @@ PY
         echo "→ Configuring nanobanana-mcp server..."
         # Credentials travel in the environment (never argv, never interpolated into the source string)
         # and the settings file is written atomically with 0600 permissions.
-        CLAUDE_SEO_SECRET="${GOOGLE_AI_API_KEY}" python3 - "${MCP_CONFIG_FILE}" <<'PY'
-import json, os, sys, tempfile
-
-settings_path, api_key = sys.argv[1], os.environ["CLAUDE_SEO_SECRET"]
-
-if os.path.exists(settings_path):
-    try:
-        with open(settings_path) as f:
-            settings = json.load(f)
-    except json.JSONDecodeError:
-        sys.exit(f"✗ {settings_path} is not valid JSON. Nothing was changed; fix it and rerun.")
-else:
-    settings = {}
-
-settings.setdefault('mcpServers', {})['nanobanana-mcp'] = {
-    'command': 'npx',
-    'args': ['-y', '@ycse/nanobanana-mcp@1.1.1'],
-    'env': {
-        'GOOGLE_AI_API_KEY': api_key,
-    },
-}
-
-os.makedirs(os.path.dirname(settings_path) or '.', exist_ok=True)
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(settings_path) or '.', prefix='.settings.', suffix='.json')
-try:
-    with os.fdopen(fd, 'w') as f:
-        json.dump(settings, f, indent=2)
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, settings_path)
-except Exception:
-    if os.path.exists(tmp):
-        os.unlink(tmp)
-    raise
-
-print('  ✓ nanobanana-mcp configured in ~/.claude.json')
-PY
+        HELPER="${SEO_SKILL_DIR:-${HOME}/.agents/skills/seo}/scripts/codex_config.py"
+        [ -f "${HELPER}" ] || HELPER="${SOURCE_DIR}/../../scripts/codex_config.py"
+        GOOGLE_AI_API_KEY="${GOOGLE_AI_API_KEY}" \
+        python3 "${HELPER}" add nanobanana-mcp --command npx \
+            --arg=-y --arg '@ycse/nanobanana-mcp@1.1.1' \
+            --env-pass GOOGLE_AI_API_KEY \
+            --config-path "${MCP_CONFIG_FILE}"
         if [ $? -ne 0 ]; then
             echo "✗ Could not auto-configure MCP server."
             echo "  See: extensions/banana/docs/BANANA-SETUP.md"
@@ -151,21 +111,21 @@ PY
     mkdir -p "${AGENT_DIR}"
     cp "${SOURCE_DIR}/agents/seo-image-gen.md" "${AGENT_DIR}/seo-image-gen.md"
 
-    # Copy scripts and references to skill directory for ${CLAUDE_SKILL_DIR} resolution
+    # Copy scripts and references to skill directory for ${CODEX_SKILL_DIR} resolution
     echo "→ Installing scripts and references..."
     mkdir -p "${SKILL_DIR}/scripts" "${SKILL_DIR}/references"
     cp "${SOURCE_DIR}/scripts/"*.py "${SKILL_DIR}/scripts/"
     cp "${SOURCE_DIR}/references/"*.md "${SKILL_DIR}/references/"
 
     # Rewrite only files copied by this extension install. Manual installs have
-    # no ${CLAUDE_PLUGIN_ROOT}, so the canonical launcher token becomes the
+    # no ${CODEX_SEO_ROOT}, so the canonical launcher token becomes the
     # absolute installed path. The substitution is idempotent.
     for installed_doc in "${SKILL_DIR}/SKILL.md" "${SKILL_DIR}/references/"*.md "${AGENT_DIR}/seo-image-gen.md"; do
         [ -f "${installed_doc}" ] || continue
-        temp_doc="${installed_doc}.claude-seo-tmp"
-        sed -e 's#"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run#"$HOME/.claude/skills/seo/scripts/claude-seo" run#g' \
-            -e 's#"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" setup#"$HOME/.claude/skills/seo/scripts/claude-seo" setup#g' \
-            -e 's#"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" doctor#"$HOME/.claude/skills/seo/scripts/claude-seo" doctor#g' \
+        temp_doc="${installed_doc}.codex-seo-tmp"
+        sed -e 's#"${CODEX_SEO_ROOT}/scripts/codex-seo" run#"$HOME/.agents/skills/seo/scripts/codex-seo" run#g' \
+            -e 's#"${CODEX_SEO_ROOT}/scripts/codex-seo" setup#"$HOME/.agents/skills/seo/scripts/codex-seo" setup#g' \
+            -e 's#"${CODEX_SEO_ROOT}/scripts/codex-seo" doctor#"$HOME/.agents/skills/seo/scripts/codex-seo" doctor#g' \
             "${installed_doc}" > "${temp_doc}"
         mv "${temp_doc}" "${installed_doc}"
     done
@@ -178,7 +138,7 @@ PY
     echo "✓ Banana Image Generation extension installed successfully!"
     echo ""
     echo "Usage:"
-    echo "  1. Start Claude Code:  claude"
+    echo "  1. Start Codex CLI:  codex"
     echo "  2. Run commands:"
     echo "     /seo image-gen og \"Professional SaaS dashboard\""
     echo "     /seo image-gen hero \"Dramatic sunset over city skyline\""

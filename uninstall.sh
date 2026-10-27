@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
-# claude-seo manual-install uninstaller (Unix / macOS / Linux)
+# codex-seo manual-install uninstaller (Unix / macOS / Linux)
 #
-# Removes the orchestrator skill (~/.claude/skills/seo), all sub-skills
-# (~/.claude/skills/seo-*), and all sub-agents (~/.claude/agents/seo-*.md).
+# Removes the orchestrator skill (~/.agents/skills/seo), all sub-skills
+# (~/.agents/skills/seo-*), and all sub-agents (~/.agents/skills/seo/agents/seo-*.md).
 #
 # Uses glob enumeration rather than a hardcoded list so future skill
 # additions are cleaned up automatically without releasing a new
 # uninstaller.
 #
-# Plugin-install users should use Claude Code's own command instead:
-#   /plugin uninstall claude-seo@agricidaniel-claude-seo
-#   /plugin marketplace remove AgriciDaniel/claude-seo
+# The /seo custom prompt (~/.codex/prompts/seo.md) is removed too.
+# MCP servers registered by extensions stay in ~/.codex/config.toml;
+# remove their [mcp_servers.*] blocks manually if desired.
 set -euo pipefail
 
-SKILL_DIR="${HOME}/.claude/skills"
-AGENT_DIR="${HOME}/.claude/agents"
+SKILL_DIR="${HOME}/.agents/skills"
+AGENT_DIR="${HOME}/.agents/skills/seo/agents"
 
 main() {
-    echo "→ Uninstalling Claude SEO..."
+    echo "→ Uninstalling Codex SEO..."
 
     local removed_skills=0
     local removed_agents=0
@@ -52,13 +52,18 @@ main() {
 
     shopt -u nullglob
 
+    # Remove the /seo custom prompt
+    if [ -f "${HOME}/.codex/prompts/seo.md" ]; then
+        rm -f "${HOME}/.codex/prompts/seo.md"
+        echo "  Removed: ${HOME}/.codex/prompts/seo.md"
+    fi
+
     if [ "${removed_skills}" -eq 0 ] && [ "${removed_agents}" -eq 0 ]; then
-        echo "  Nothing to remove. Claude SEO does not appear to be installed."
-        echo "  If you installed via /plugin install, run /plugin uninstall instead."
+        echo "  Nothing to remove. Codex SEO does not appear to be installed."
         return 0
     fi
 
-    echo "✓ Claude SEO uninstalled (${removed_skills} skill dirs, ${removed_agents} agent files)."
+    echo "✓ Codex SEO uninstalled (${removed_skills} skill dirs, ${removed_agents} agent files)."
 }
 
 main "$@"

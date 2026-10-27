@@ -261,7 +261,7 @@ def analyze_url(
         resp = safe_requests_get(
             url,
             timeout=30,
-            headers={"User-Agent": "Mozilla/5.0 (compatible; ClaudeSEO/1.7 NLP Analyzer)"},
+            headers={"User-Agent": "Mozilla/5.0 (compatible; CodexSEO/1.7 NLP Analyzer)"},
         )
         resp.raise_for_status()
         html = decode_response_text(resp)

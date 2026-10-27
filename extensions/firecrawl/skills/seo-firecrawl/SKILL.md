@@ -5,8 +5,6 @@ description: >
   Use when user says "crawl site", "map site", "full crawl",
   "find all pages", "broken links", "site structure",
   "discover pages", "JS rendering", or needs site-wide analysis.
-user-invocable: true
-argument-hint: "[command] <url>"
 license: MIT
 compatibility: "Requires Firecrawl MCP server"
 metadata:
@@ -15,7 +13,7 @@ metadata:
   category: seo
 ---
 
-# Firecrawl Extension for Claude SEO
+# Firecrawl Extension for Codex SEO
 
 This skill requires the Firecrawl extension to be installed:
 ```bash

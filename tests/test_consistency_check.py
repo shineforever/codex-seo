@@ -94,7 +94,7 @@ def test_agent_refs_resolve_inside_an_extension_tree():
 
     ``seo-matomo`` ships only at ``extensions/matomo/agents/seo-matomo.md``
     (no core mirror, unlike ``seo-dataforseo``). Its installer copies it into
-    ``~/.claude/agents/``, so the installers' ``agents/seo-matomo.md``
+    ``~/.agents/skills/seo/agents/``, so the installers' ``agents/seo-matomo.md``
     mentions must resolve. Before this rule was path-aware, all three Matomo
     installer scripts were reported as dead agent refs.
     """

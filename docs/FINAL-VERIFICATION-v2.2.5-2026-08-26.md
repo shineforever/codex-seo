@@ -1,4 +1,4 @@
-# Claude SEO v2.2.5 final verification
+# Codex SEO v2.2.5 final verification
 
 Date: 2026-08-26
 
@@ -99,7 +99,7 @@ retains malformed body metadata.
 - Public and private release commits are not separated by one branding commit.
   They are separately reviewed histories with documented content differences.
 - The website repository does have a private origin:
-  `AgriciDaniel/claude-seo-website`.
+  `zhtyyx/codex-seo-website`.
 - Repository-wide Ruff did not pass on the frozen release tag. It passes on
   current public `main` after a separately reviewed mechanical cleanup.
 - Production deployment and source-control durability are complete.

@@ -28,7 +28,7 @@ DATAFORSEO_EXT = ROOT / "extensions/dataforseo/skills/seo-dataforseo"
 # The image-gen skill differs on purpose: the core copy has no scripts and
 # points at the installed Banana MCP, while the extension copy ships
 # presets.py, cost_tracker.py and generate.py and resolves them through
-# ${CLAUDE_SKILL_DIR}. These files may differ; every other reference must not.
+# ${CODEX_SKILL_DIR}. These files may differ; every other reference must not.
 IMAGE_GEN_CORE_REFS = ROOT / "skills/seo-image-gen/references"
 IMAGE_GEN_EXT_REFS = ROOT / "extensions/banana/references"
 IMAGE_GEN_ALLOWED_DIFFERENCES = {

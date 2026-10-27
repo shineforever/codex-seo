@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Backlink verification crawler for Claude SEO.
+Backlink verification crawler for Codex SEO.
 
 Verifies whether known backlinks still exist by fetching source pages and
 checking if the target URL appears in their outbound links. Uses HTTP HEAD
@@ -64,7 +64,7 @@ def _head_check(url: str, timeout: int = 15) -> dict:
             url,
             timeout=timeout,
             allow_redirects=True,
-            headers={"User-Agent": "ClaudeSEO/1.8.0 BacklinkVerifier"},
+            headers={"User-Agent": "CodexSEO/1.8.0 BacklinkVerifier"},
         )
         return {
             "status_code": resp.status_code,
@@ -287,7 +287,7 @@ def verify_backlinks(target_url: str, links: list, head_only: bool = False,
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Backlink verification crawler for Claude SEO"
+        description="Backlink verification crawler for Codex SEO"
     )
     parser.add_argument(
         "--target",

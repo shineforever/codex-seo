@@ -6,9 +6,9 @@ Covers:
 - Token never appears in output / URL parameters
 - URL shape check (allows self-hosted, rejects malformed)
 - SSRF: every request goes through url_safety's pinned helpers; a private
-  instance needs CLAUDE_SEO_LOCAL_TARGETS; redirects off the instance refused
+  instance needs CODEX_SEO_LOCAL_TARGETS; redirects off the instance refused
 - Env-var and config-file credential loading (env wins over file when both set)
-- Credential storage: 0600, atomic, argv-based, never in ~/.claude/settings.json
+- Credential storage: 0600, atomic, argv-based, never in ~/.codex/settings.json
 - Args / CLI error paths surface a structured error envelope
 - Token redaction of incoming Matomo ``result=error`` messages
 """
@@ -42,7 +42,7 @@ PUBLIC_IP = "93.184.216.34"
 def _isolated_credentials(monkeypatch, tmp_path):
     """Isolate tests from both env vars and any real config file.
 
-    A developer machine may have ~/.config/claude-seo/matomo.json with
+    A developer machine may have ~/.config/codex-seo/matomo.json with
     live credentials; without config isolation, CLI tests would pick it
     up and make real network calls. CONFIG_PATH points at a missing
     tmp file by default; tests that need a config file monkeypatch it
@@ -588,7 +588,7 @@ def test_private_instance_is_refused_without_the_allowlist(monkeypatch):
 
 
 def test_private_instance_is_accepted_with_the_allowlist(monkeypatch):
-    """CLAUDE_SEO_LOCAL_TARGETS is the supported route to a private instance."""
+    """CODEX_SEO_LOCAL_TARGETS is the supported route to a private instance."""
     monkeypatch.setenv(matomo_auth.LOCAL_TARGETS_ENV, "10.0.0.5:8080")
     with _real_guard(monkeypatch, resolved_ip="10.0.0.5") as post:
         env = matomo_report._request("http://10.0.0.5:8080", SECRET_TOKEN,
@@ -694,7 +694,7 @@ def test_resolves_to_private_address_drives_the_installer_hint(monkeypatch):
 
 
 # --------------------------------------------------------------------------
-# Credential storage: ~/.config/claude-seo/matomo.json, 0600, atomic.
+# Credential storage: ~/.config/codex-seo/matomo.json, 0600, atomic.
 # --------------------------------------------------------------------------
 
 INSTALL_SH = ROOT / "extensions" / "matomo" / "install.sh"
@@ -792,7 +792,7 @@ def test_load_config_tightens_a_world_readable_file(monkeypatch, tmp_path):
 
 
 def test_installers_do_not_put_the_token_in_settings_json():
-    """The token belongs in ~/.config/claude-seo/matomo.json, not settings.json.
+    """The token belongs in ~/.config/codex-seo/matomo.json, not settings.json.
 
     settings.json is a general-purpose config file that tooling reads, prints,
     and syncs. The PR's installers wrote MATOMO_API_TOKEN into its env block.
@@ -812,7 +812,7 @@ def test_installers_do_not_put_the_token_in_settings_json():
                 f"{path.name} still writes credentials into settings.json ({needle})"
             )
         assert "save_config" in text, f"{path.name} must use matomo_auth.save_config"
-        assert ".config/claude-seo" in text or "CONFIG_PATH" in text, (
+        assert ".config/codex-seo" in text or "CONFIG_PATH" in text, (
             f"{path.name} must name the credential file it writes"
         )
 
@@ -830,23 +830,25 @@ def test_installers_pass_credentials_through_env_not_source_or_argv():
     # arrive in the environment, never inside the here-string or on argv.
     assert "sys.argv" in ps1
     assert "$TokenPlain" not in ps1.split('@"')[1].split('"@')[0]
-    assert "$env:CLAUDE_SEO_SECRET = $TokenPlain" in ps1
+    assert "$env:CODEX_SEO_SECRET = $TokenPlain" in ps1
     assert "python - $MatomoAuth $MatomoUrl $SiteId" in ps1
-    assert 'CLAUDE_SEO_SECRET="${MATOMO_TOKEN}" python3 -' in sh
+    assert 'CODEX_SEO_SECRET="${MATOMO_TOKEN}" python3 -' in sh
 
 
 def test_uninstall_removes_the_config_and_the_legacy_env_entry():
     text = UNINSTALL_SH.read_text(encoding="utf-8")
-    assert ".config/claude-seo/matomo.json" in text
-    assert "MATOMO_API_TOKEN" in text, "must still clear the pre-v2.4.0 env entry"
-    assert "os.replace" in text, "the settings.json rewrite must stay atomic"
+    assert ".config/codex-seo/matomo.json" in text
+    assert "MATOMO_API_TOKEN" in text, "must still clear the legacy env entry"
+    assert "env-del MATOMO_URL MATOMO_API_TOKEN MATOMO_TOKEN MATOMO_SITE_ID MATOMO_IDSITE" in text, (
+        "legacy env keys must be removed through codex_config.py"
+    )
 
 
 def test_installers_warn_about_a_private_instance_address():
     for path in (INSTALL_SH, INSTALL_PS1):
         text = path.read_text(encoding="utf-8")
         assert "--local-target-hint" in text, (
-            f"{path.name} must print the CLAUDE_SEO_LOCAL_TARGETS hint"
+            f"{path.name} must print the CODEX_SEO_LOCAL_TARGETS hint"
         )
 
 
@@ -874,12 +876,12 @@ def test_installer_writer_is_inert_against_an_injection_shaped_token(tmp_path):
          str(ROOT / "scripts" / "matomo_auth.py"),
          "https://analytics.example.com", "3"],
         capture_output=True, text=True,
-        env={**os.environ, "HOME": str(home), "CLAUDE_SEO_SECRET": nasty},
+        env={**os.environ, "HOME": str(home), "CODEX_SEO_SECRET": nasty},
     )
     assert proc.returncode == 0, proc.stderr
     assert not (tmp_path / "pwned").exists(), "installer executed the token"
 
-    written = home / ".config" / "claude-seo" / "matomo.json"
+    written = home / ".config" / "codex-seo" / "matomo.json"
     assert written.stat().st_mode & 0o777 == 0o600
     assert json.loads(written.read_text())["matomo_token"] == nasty
 
@@ -893,9 +895,9 @@ def test_installer_writer_survives_a_dropped_optional_argument(tmp_path):
          str(ROOT / "scripts" / "matomo_auth.py"),
          "https://analytics.example.com"],   # no site-ID argument
         capture_output=True, text=True,
-        env={**os.environ, "HOME": str(home), "USERPROFILE": str(home), "CLAUDE_SEO_SECRET": SECRET_TOKEN},
+        env={**os.environ, "HOME": str(home), "USERPROFILE": str(home), "CODEX_SEO_SECRET": SECRET_TOKEN},
     )
     assert proc.returncode == 0, proc.stderr
-    stored = json.loads((home / ".config" / "claude-seo" / "matomo.json").read_text())
+    stored = json.loads((home / ".config" / "codex-seo" / "matomo.json").read_text())
     assert stored["matomo_token"] == SECRET_TOKEN
     assert "matomo_site_id" not in stored

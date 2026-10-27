@@ -67,7 +67,7 @@ jobs:
           # does not triple the calls (the portability job also runs them on
           # Windows and macOS). gh honors GH_TOKEN, which keeps sync_flow.py
           # clear of the anonymous 60/hr per-IP rate limit on shared runners.
-          CLAUDE_SEO_NETWORK_TESTS: ${{ matrix.python-version == '3.11' && '1' || '' }}
+          CODEX_SEO_NETWORK_TESTS: ${{ matrix.python-version == '3.11' && '1' || '' }}
           GH_TOKEN: ${{ github.token }}
         run: pytest tests/ -v
 
@@ -122,7 +122,7 @@ jobs:
         # POSIX mode bits (the executable bit, chmod 0o600/0o644) skip on
         # Windows via os.name; everything else must hold on every platform.
         env:
-          CLAUDE_SEO_NETWORK_TESTS: "1"
+          CODEX_SEO_NETWORK_TESTS: "1"
           GH_TOKEN: ${{ github.token }}
         run: pytest tests/ -v
 

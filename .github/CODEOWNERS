@@ -1,33 +1,31 @@
-# CODEOWNERS for claude-seo
+# CODEOWNERS for codex-seo
 #
-# Every change to this repository routes review to @AgriciDaniel.
+# Every change to this repository routes review to @zhtyyx.
 # Sections below let us call out security-critical paths so a future
 # co-maintainer cannot accidentally land a change without the right
 # eyes on it.
 
 # Default owner — every file unless overridden below.
-*                                   @AgriciDaniel
+*                                   @zhtyyx
 
 # Security-critical: SSRF + DNS rebinding + credential handling.
-scripts/url_safety.py               @AgriciDaniel
-scripts/google_auth.py              @AgriciDaniel
-scripts/backlinks_auth.py           @AgriciDaniel
-scripts/render_page.py              @AgriciDaniel
-scripts/fetch_page.py               @AgriciDaniel
-scripts/capture_screenshot.py       @AgriciDaniel
-tests/test_url_safety.py            @AgriciDaniel
-SECURITY.md                         @AgriciDaniel
+scripts/url_safety.py               @zhtyyx
+scripts/google_auth.py              @zhtyyx
+scripts/backlinks_auth.py           @zhtyyx
+scripts/render_page.py              @zhtyyx
+scripts/fetch_page.py               @zhtyyx
+scripts/capture_screenshot.py       @zhtyyx
+tests/test_url_safety.py            @zhtyyx
+SECURITY.md                         @zhtyyx
 
 # Release + distribution: install scripts and version pinning are the
 # supply-chain surface.
-install.sh                          @AgriciDaniel
-install.ps1                         @AgriciDaniel
-.claude-plugin/plugin.json          @AgriciDaniel
-.claude-plugin/marketplace.json     @AgriciDaniel
-requirements.txt                    @AgriciDaniel
-pyproject.toml                      @AgriciDaniel
-CITATION.cff                        @AgriciDaniel
+install.sh                          @zhtyyx
+install.ps1                         @zhtyyx
+requirements.txt                    @zhtyyx
+pyproject.toml                      @zhtyyx
+CITATION.cff                        @zhtyyx
 
 # CI / governance.
-.github/                            @AgriciDaniel
-tests/test_manifest_consistency.py  @AgriciDaniel
+.github/                            @zhtyyx
+tests/test_manifest_consistency.py  @zhtyyx

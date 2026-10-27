@@ -53,6 +53,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -97,11 +98,13 @@ def _sha256(path: Path) -> str:
 
 
 def _read_plugin_version() -> str:
-    manifest = REPO_ROOT / ".claude-plugin" / "plugin.json"
+    metadata = REPO_ROOT / "pyproject.toml"
     try:
-        with manifest.open() as fh:
-            return json.load(fh).get("version", "unknown")
-    except (OSError, json.JSONDecodeError):
+        match = re.search(
+            r'(?m)^version\s*=\s*"([^"]+)"', metadata.read_text(encoding="utf-8")
+        )
+        return match.group(1) if match else "unknown"
+    except OSError:
         return "unknown"
 
 
@@ -152,7 +155,7 @@ def compare(old: dict, new: dict) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Generate or compare claude-seo release SHA-256 manifests."
+        description="Generate or compare codex-seo release SHA-256 manifests."
     )
     parser.add_argument(
         "--compare",

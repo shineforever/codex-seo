@@ -1,5 +1,15 @@
 # Changelog
 
+> **Port note (2026-10-27).** Entries below this note document the upstream
+> claude-seo project by Agrici Daniel, from which this repository was ported
+> to OpenAI Codex CLI as codex-seo. Historical entries keep their original
+> wording (including Claude Code product names and paths); only the header
+> above applies to this port. The port itself: skills install to
+> `~/.agents/skills`, the `/seo` command is a Codex custom prompt, MCP
+> servers register in `~/.codex/config.toml`, and the 19 sub-agents run as
+> sequential role playbooks.
+
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -16,7 +26,7 @@ Security and accuracy fixes from a full audit, and Claude Desktop installs again
 backport) needs 3.11. Python 3.15 is not supported yet because the Google Ads
 client library declares `< 3.15`. If your default Python is outside the range,
 the launcher and `install.ps1` now pick a supported one on their own, or you
-can set `CLAUDE_SEO_PYTHON`; `/seo setup` then rebuilds the runtime once.
+can set `CODEX_SEO_PYTHON`; `/seo setup` then rebuilds the runtime once.
 
 ### Added
 
@@ -61,32 +71,32 @@ can set `CLAUDE_SEO_PYTHON`; `/seo setup` then rebuilds the runtime once.
 - The supported Python range lives in one place (`MIN_PYTHON` and
   `MAX_PYTHON` in `scripts/runtime.py`), and a test keeps the launcher,
   `install.ps1`, `pyproject.toml`, CI and the docs in step with it.
-  `scripts/claude-seo` and `install.ps1` skip a default interpreter outside the
+  `scripts/codex-seo` and `install.ps1` skip a default interpreter outside the
   range (on Windows, `py -3` picks the newest installed Python, which can be
   3.15) and fall back to the newest supported one, and `install.ps1` now honors
-  `CLAUDE_SEO_PYTHON`. `/seo setup` refuses an unsupported interpreter with a
+  `CODEX_SEO_PYTHON`. `/seo setup` refuses an unsupported interpreter with a
   clear message.
 - `requirements.txt` sets `pillow>=13.0.0` (it arrives through matplotlib and
   WeasyPrint).
 - CI runs ruff, tests Python 3.11, 3.12 and 3.14, audits dependencies on both
   3.11 and 3.14, pins GitHub Actions to commit SHAs, and no longer exposes
   `GH_TOKEN` to install steps. The Windows smoke test covers a pinned
-  `CLAUDE_SEO_PYTHON` and the installer's own interpreter choice.
+  `CODEX_SEO_PYTHON` and the installer's own interpreter choice.
 - SECURITY.md and PRIVACY.md describe what the code does, including which
   calls go to fixed vendor hosts and how to verify a signed release tag.
 
 ### Fixed
 
-- **Claude Desktop installs claude-seo again (#344).** The claude-seo plugin
+- **Claude Desktop installs codex-seo again (#344).** The codex-seo plugin
   folder is the whole repository, and since v2.4.2 it held a second plugin
   manifest at `plugins/seo-cockpit/.claude-plugin/plugin.json`, which Claude
   Desktop refuses ("plugin.json must be at .claude-plugin/plugin.json at the
   plugin root ... found nested"). seo-cockpit now lives on the `seo-cockpit`
   branch of this repository and the marketplace installs it from there with a
   `git-subdir` source pinned to a commit. It stays optional, keeps its install
-  id (`seo-cockpit@agricidaniel-claude-seo`) and moves to 0.3.4 (author and
+  id (`seo-cockpit@agricidaniel-codex-seo`) and moves to 0.3.4 (author and
   homepage fields only). A new test fails if any nested plugin manifest
-  returns to the claude-seo tree.
+  returns to the codex-seo tree.
 
 ### Security
 
@@ -135,7 +145,7 @@ seo-cockpit, Google sign-in through your own account, and a schema-hook fix.
 
 - `plugins/seo-cockpit` 0.3.3: an optional mods companion plugin (Claude
   Code 2.1.287+), a second entry in the marketplace
-  (`/plugin install seo-cockpit@agricidaniel-claude-seo`).
+  (`/plugin install seo-cockpit@agricidaniel-codex-seo`).
   - Spend guard: holds paid SEO API calls against the DataForSEO budget
     before they run (DataForSEO MCP tools and the Merchant script are priced
     by `dataforseo_costs.py`; Ahrefs, Firecrawl, image generation, Moz,
@@ -156,7 +166,7 @@ seo-cockpit, Google sign-in through your own account, and a schema-hook fix.
   - Zero-token `/seo-spend` and `/seo-doctor`.
   - Settings in `/config`: Default site, Audits folder, Google account
     (`auto` or `gcloud`) and a sensitive Google API key.
-  - Verified on Claude Code 2.1.289: 85 kit tests (`claude plugin test`),
+  - Verified on Codex CLI 2.1.289: 85 kit tests (`claude plugin test`),
     `claude plugin validate --strict`, and a live run on a real site.
 - `seo-maps`: a geo-grid scan now also saves its grid as
   `{business}-maps/geo-grid-{keyword}-{date}.json`, for comparison over
@@ -166,8 +176,8 @@ seo-cockpit, Google sign-in through your own account, and a schema-hook fix.
 
 - Google APIs can use the person's own gcloud sign-in
   (`gcloud auth application-default login`): it is the fallback when no
-  claude-seo OAuth token or service account is configured, and
-  `CLAUDE_SEO_GOOGLE_AUTH=adc` chooses it even when a service account is set.
+  codex-seo OAuth token or service account is configured, and
+  `CODEX_SEO_GOOGLE_AUTH=adc` chooses it even when a service account is set.
   A service account often lacks access to properties the person owns. Only an
   `authorized_user` gcloud file counts, and it refreshes with the scopes
   granted at login.
@@ -177,7 +187,7 @@ seo-cockpit, Google sign-in through your own account, and a schema-hook fix.
 ### Fixed
 
 - Schema hook (`hooks/validate-schema.py`): diagnostics went to stdout,
-  which Claude Code ignores, so Claude never saw them. Critical errors now
+  which Codex CLI ignores, so Claude never saw them. Critical errors now
   exit 2 with the errors on stderr (fed back to Claude); warnings exit 0
   with `hookSpecificOutput.additionalContext` JSON, which Claude reads
   without an error notice. Wording no longer claims the edit is blocked: a
@@ -292,16 +302,16 @@ as third-party instead of being stated as fact.
   Matomo Cloud analytics. Adds `/seo matomo organic | top-pages | device
   | country | referrers | keywords` as a GA4 alternative or complement.
   The audit orchestrator spawns a new `seo-matomo` agent when
-  `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run matomo_auth.py --check`
+  `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_auth.py --check`
   succeeds, writing `findings/matomo.md` alongside the existing specialists.
   Response parsing is verified live against Matomo 5, including array-shaped
   DataTables, count-based bounce fields, `Referrers.getReferrerType` naming,
   and locale-independent anonymized-keyword detection via the row `segment`
-  field. Credentials live in `~/.config/claude-seo/matomo.json` (0600, written
+  field. Credentials live in `~/.config/codex-seo/matomo.json` (0600, written
   atomically), with the `MATOMO_URL` / `MATOMO_API_TOKEN` / `MATOMO_SITE_ID`
   environment variables still taking precedence. Every request to the instance
   goes through `url_safety`'s DNS-pinned helpers; a self-hosted instance on a
-  private address is reached by naming it in `CLAUDE_SEO_LOCAL_TARGETS`, which
+  private address is reached by naming it in `CODEX_SEO_LOCAL_TARGETS`, which
   both installers print at install time, and a redirect away from the instance
   is refused rather than followed. Contributed by Tim J. Peters (#275).
 
@@ -311,14 +321,14 @@ as third-party instead of being stated as fact.
   `extensions/*/install.sh` that writes credentials, and the four
   `install.ps1` files that hand credentials to Python (profound, seranking,
   bing-webmaster, matomo), passed API keys, tokens and passwords to Python as arguments, readable by any local user through
-  `ps`. They now travel in the environment (`CLAUDE_SEO_SECRET` and
+  `ps`. They now travel in the environment (`CODEX_SEO_SECRET` and
   friends), which only the same user can read; PowerShell clears the
   variables afterwards. Found while reviewing #305, whose installer shares
   the flaw.
 - **Installers no longer wipe a malformed config.** Seven shell writers and
   three PowerShell writers reset
-  `~/.claude.json` or `~/.claude/settings.json` to `{}` when the file failed
-  to parse and wrote that back, deleting the user's whole Claude Code
+  `~/.codex/config.toml` or `~/.codex/settings.json` to `{}` when the file failed
+  to parse and wrote that back, deleting the user's whole Codex CLI
   configuration. They now exit with "Nothing was changed". The PowerShell
   writers check `$LASTEXITCODE`, so they no longer print "Done." after the
   refusal.
@@ -353,10 +363,10 @@ as third-party instead of being stated as fact.
   full Google Images SERP. A fixture of the pinned server's 80 tool names now
   guards every skill. (#317)
 - Cross-skill reference paths in agents and skills are anchored to
-  `${CLAUDE_PLUGIN_ROOT}` (manual installs rewrite them to the absolute
+  `${CODEX_SEO_ROOT}` (manual installs rewrite them to the absolute
   skills directory), so subagents no longer search the disk for paths they
   cannot resolve. This removes one trigger for #252; the orphaned-process
-  cleanup it reports is Claude Code behaviour, not fixed here.
+  cleanup it reports is Codex CLI behaviour, not fixed here.
 - `ucp_check.py` rejected real, spec-conformant UCP profiles ("0
   capabilities, 3 structural issues"); it now parses the ucp.dev shape.
 - Hostile or malformed content that crashed `agentic_check`, `ucp_check`,
@@ -433,7 +443,7 @@ as third-party instead of being stated as fact.
   and SSRF-checked before use, and requests are capped at 100 domains per
   call. `keywordseverywhere_api.py` is registered in `runtime.py`'s
   `ALLOWED_CORE_SCRIPTS` (a script invoked from a SKILL.md but missing from
-  that allowlist is refused by `claude-seo run`; a new test in
+  that allowlist is refused by `codex-seo run`; a new test in
   `tests/test_runtime.py` guards against that class of bug for every
   script every SKILL.md/agent invokes). The live API path is unverified:
   landing this required no Keywords Everywhere account, and none was
@@ -442,7 +452,7 @@ as third-party instead of being stated as fact.
 ### Changed
 
 - The five judgment-heavy agents (`seo-content`, `seo-geo`, `seo-sxo`, `seo-cluster`,
-  `seo-drift`) declare `model: opus`; the other thirteen stay on Sonnet. README
+  `seo-drift`) declare `model: default`; the other thirteen stay on Sonnet. README
   documents the cost implication and how to override per agent (#268).
 - Applied the mechanical hunks from #196 ("ponytail cleanup") by hand: hoisted
   three function-local `from urllib.parse import urlparse` imports to the top of
@@ -456,11 +466,11 @@ as third-party instead of being stated as fact.
 ### Fixed
 
 - `metadata_template.py`, added in v2.3.0, was not registered in the launcher's
-  `ALLOWED_CORE_SCRIPTS`, so `claude-seo run metadata_template.py` was refused for
+  `ALLOWED_CORE_SCRIPTS`, so `codex-seo run metadata_template.py` was refused for
   `/seo page` and `/seo programmatic`. Registered, with a test that every script an
   instruction file invokes is allowlisted.
 - The dataforseo, ahrefs and firecrawl PowerShell installers created `mcpServers` as
-  a hashtable, which `ConvertTo-Json` serialised as `{}` when `~/.claude.json` was
+  a hashtable, which `ConvertTo-Json` serialised as `{}` when `~/.codex/config.toml` was
   missing or had no `mcpServers` yet, silently dropping the server entry; they now
   create an object. They also wrote the file with a byte-order mark on Windows
   PowerShell 5.1, which Node's JSON parser rejects; the write is BOM-free now.
@@ -477,7 +487,7 @@ as third-party instead of being stated as fact.
 - `extensions/dataforseo/install.ps1` and `extensions/ahrefs/install.ps1` merged
   their MCP server entry with an embedded Python heredoc (`tempfile.mkstemp` +
   `os.replace`), and `extensions/firecrawl/uninstall.ps1` wrote
-  `ConvertTo-Json -Depth 10` straight to `~/.claude.json` with no temp file. All
+  `ConvertTo-Json -Depth 10` straight to `~/.codex/config.toml` with no temp file. All
   three now follow the native `ConvertTo-Json -Depth 100` + temp-file +
   `Move-Item -Force` pattern v2.3.0 established in
   `extensions/firecrawl/install.ps1`; `ahrefs/install.ps1` no longer requires
@@ -501,7 +511,7 @@ as third-party instead of being stated as fact.
   RFC 1918, RFC 6598, link-local, or a metadata address is refused with an error
   naming the address. This narrows #280: a loopback CONNECT proxy is no longer
   trusted. (#280, #295)
-- `CLAUDE_SEO_LOCAL_TARGETS` allows auditing a local dev server, a staging host,
+- `CODEX_SEO_LOCAL_TARGETS` allows auditing a local dev server, a staging host,
   or a machine reached over Tailscale, without the blanket "allow private"
   switch that would follow any private URL found on a crawled page. It is a
   comma-separated list of `host` or `host:port` entries, consulted only for the
@@ -615,16 +625,16 @@ as third-party instead of being stated as fact.
   steps under Windows PowerShell 5.1 (`shell: powershell`), which is what
   actually caught #207.
 - The dataforseo, firecrawl, ahrefs, and banana extension installers wrote
-  their MCP server block to `~/.claude/settings.json`, a key Claude Code does
+  their MCP server block to `~/.codex/settings.json`, a key Codex CLI does
   not read from that file, so the server never loaded and reinstalling could
-  not fix it. They now write `~/.claude.json` (the file `claude mcp add`
+  not fix it. They now write `~/.codex/config.toml` (the file `codex mcp add`
   writes) across install/uninstall scripts, banana's Python helpers, and the
   setup docs. `bing-webmaster`, `profound`, and `seranking` were left alone:
   they write the `env` key, which settings.json does support (#204).
 - `extensions/firecrawl/install.ps1` and `extensions/banana/scripts/
-  setup_mcp.py` now write `~/.claude.json` atomically (temp file in the same
+  setup_mcp.py` now write `~/.codex/config.toml` atomically (temp file in the same
   directory, then `Move-Item -Force` / `os.replace`), and the PowerShell
-  serialisation depth is raised from 10 to 100 so an existing `~/.claude.json`
+  serialisation depth is raised from 10 to 100 so an existing `~/.codex/config.toml`
   with deeply nested config round-trips intact instead of being flattened.
 - `scripts/backlinks_auth.py`'s token file hardening was a no-op on Windows:
   it had no write path at all, and its permission story on POSIX (none) did
@@ -632,7 +642,7 @@ as third-party instead of being stated as fact.
   `google_auth._chmod_quiet`, gains a `save_config()` that mirrors
   `google_auth.py`'s `os.open`/`os.fchmod` 0o600 write pattern, and both
   `save_config()` and `load_config()` make a best-effort `icacls` call on
-  Windows to restrict `~/.config/claude-seo/backlinks-api.json` to the
+  Windows to restrict `~/.config/codex-seo/backlinks-api.json` to the
   current user, since POSIX mode bits do not restrict NTFS ACLs (#290).
 - 17 scripts raise `sys.exit(1)` at import time when an optional dependency
   (`requests`, `bs4`, `playwright`, `googleapiclient`, `google.analytics`) is
@@ -660,8 +670,8 @@ as third-party instead of being stated as fact.
   actually writes, with a tolerant fallback for the `jsonExpanded` object
   shape, instead of assuming a dict. `extensions/unlighthouse/install.sh`
   no longer aborts on a marketplace/plugin install: it now also checks
-  `${CLAUDE_PLUGIN_ROOT}` and the plugin cache before requiring the manual
-  `~/.claude/skills/seo` layout. Fixes #189.
+  `${CODEX_SEO_ROOT}` and the plugin cache before requiring the manual
+  `~/.agents/skills/seo` layout. Fixes #189.
 - Raised `maxTurns` on all 16 agents `seo-audit` can spawn (`seo-technical`
   20→45, `seo-content` 15→45, and thirteen others that were below 30) so a
   large-site audit doesn't hit its turn budget before finishing. Every one of
@@ -695,13 +705,13 @@ as third-party instead of being stated as fact.
 
 - The plugin installs from the claude.ai-hosted marketplace. Hosted sync rejects any
   plugin with a top-level `bin/` directory, so the launcher moved to
-  `scripts/claude-seo` and every skill, agent, and doc calls it as
-  `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run <script.py>`. Manual installs copy the
-  launcher to `~/.claude/skills/seo/scripts/claude-seo` and rewrite that token to the
+  `scripts/codex-seo` and every skill, agent, and doc calls it as
+  `"${CODEX_SEO_ROOT}/scripts/codex-seo" run <script.py>`. Manual installs copy the
+  launcher to `~/.agents/skills/seo/scripts/codex-seo` and rewrite that token to the
   absolute path. A layout test keeps `bin/` from coming back. Fixes #298 and #199.
 - CI runs the full suite on Windows and macOS, audits `requirements.txt` with
   `pip-audit`, and no longer swallows a failed dependency install in the v2 audit.
-- `CLAUDE_SEO_CONFIG_DIR` overrides the config and ledger location, so the ledger tests
+- `CODEX_SEO_CONFIG_DIR` overrides the config and ledger location, so the ledger tests
   run against an isolated file. `BANANA_HOME` does the same for the Banana ledger.
 - `preload_check.py --fail-under N` turns the score into an opt-in gate.
 - Regression coverage for the backlink report validator, the schema-hook UTF-8 output,
@@ -721,7 +731,7 @@ as third-party instead of being stated as fact.
 - The Repository Topology section of CLAUDE.md describes the two single-remote
   checkouts and the cherry-pick promotion flow actually in use.
 - The three `test_sync_flow.py` tests that call the live GitHub API run only when
-  `CLAUDE_SEO_NETWORK_TESTS=1`; both CI test jobs set it with `GH_TOKEN`.
+  `CODEX_SEO_NETWORK_TESTS=1`; both CI test jobs set it with `GH_TOKEN`.
 
 ### Fixed
 
@@ -770,7 +780,7 @@ as third-party instead of being stated as fact.
   positives.
 - Agent-UX reports now fail closed on empty rendered documents, capture Chromium's
   accessibility tree through CDP, and expose partial or failed capture states.
-- User-facing guidance now routes bundled Python modules through `claude-seo run`.
+- User-facing guidance now routes bundled Python modules through `codex-seo run`.
 
 ## [2.2.4] - 2026-07-20
 
@@ -780,7 +790,7 @@ patches excluded. No breaking command changes. Full suite: 410 passing tests.
 
 ### Added
 
-- Managed cross-platform Python runtime with `claude-seo run`, `/seo setup`, and `/seo doctor`.
+- Managed cross-platform Python runtime with `codex-seo run`, `/seo setup`, and `/seo doctor`.
   Plugin environments persist under Claude's plugin data directory, manual installs use an
   isolated local environment, and bundled scripts no longer depend on the caller's working
   directory or a hardcoded Python executable.
@@ -930,7 +940,7 @@ Security, cross-platform, and data-accuracy release. Folds the v2.1.0 currency c
 - **Unlighthouse and Ahrefs extension invocations.** The Unlighthouse extension called a non-existent npm package (`unlighthouse-cli`); it now uses `unlighthouse@0.13.5`. The Ahrefs extension is pinned to `@ahrefs/mcp@0.0.11` and invokes the package's real `mcp` binary.
 - **FLOW prompt dead links.** 82 links across the 41 FLOW prompt files pointed at the upstream folder layout that does not exist in this plugin. `sync_flow.py` now rewrites them to the flattened layout on every sync, and the existing files were repaired.
 - **sync_flow offline crash.** `--dry-run` raised an uncaught network error when GitHub was unreachable; it now exits cleanly with an actionable message.
-- **Install slug and stale figures.** Corrected the marketplace slug in the install docs to `claude-seo@agricidaniel-claude-seo`, the `CITATION.cff` release date, the README test count (326), the AGENTS.md script count (50), and the README FAQ guidance.
+- **Install slug and stale figures.** Corrected the marketplace slug in the install docs to `codex-seo@agricidaniel-codex-seo`, the `CITATION.cff` release date, the README test count (326), the AGENTS.md script count (50), and the README FAQ guidance.
 
 ### Added
 
@@ -1202,7 +1212,7 @@ release. v2 will be a separate design conversation:
 - This release rolls forward two commits that landed on main after the v1.9.7
   tag was cut:
   - `8514999`: marketplace metadata polish (added `category: "marketing"`,
-    `homepage: https://claude-seo.md`, and a 14-keyword array to the
+    `homepage: https://github.com/zhtyyx/codex-seo`, and a 14-keyword array to the
     marketplace.json plugin entry). The `author` object for the plugin entry
     was intentionally scoped here too but did not land in this commit; it
     lands in v1.9.9 (issue #92).
@@ -1288,7 +1298,7 @@ release. v2 will be a separate design conversation:
 - **FLOW cross-references**: Integration notes added to seo-geo, seo-local, seo-content, and seo-cluster skills.
 
 ### License
-- FLOW content bundled under CC BY 4.0. Attribution header on every prompt file (automated by `sync_flow.py`). Claude SEO's MIT license unchanged, applies to skill code only.
+- FLOW content bundled under CC BY 4.0. Attribution header on every prompt file (automated by `sync_flow.py`). Codex SEO's MIT license unchanged, applies to skill code only.
 
 ## [1.9.0] - 2026-04-14
 
@@ -1359,7 +1369,7 @@ release. v2 will be a separate design conversation:
 ### Fixed
 - **Version mismatch**: unified all 19 SKILL.md files, plugin.json, and CLAUDE.md to v1.8.0 (was 1.7.0/1.7.2/1.8.0 three-way split)
 - **Broken reference path**: seo-backlinks now correctly points to `skills/seo/references/backlink-quality.md` (shared reference)
-- **Hardcoded absolute paths**: removed `~/.claude/skills/` from `agents/seo-visual.md`, `agents/seo-schema.md`, `skills/seo-image-gen/SKILL.md`, and banana extension copy (now use plugin-relative paths)
+- **Hardcoded absolute paths**: removed `~/.agents/skills/` from `agents/seo-visual.md`, `agents/seo-schema.md`, `skills/seo-image-gen/SKILL.md`, and banana extension copy (now use plugin-relative paths)
 - **seo-dataforseo line count**: moved 35-line utility tools list to reference file, reduced from 416 to 380 lines
 
 ### Changed
@@ -1437,8 +1447,8 @@ release. v2 will be a separate design conversation:
 ## [1.6.1] - 2026-03-27
 
 ### Added
-- **Marketplace distribution**: Created `.claude-plugin/marketplace.json` for plugin marketplace submission. Users can now install via `/plugin marketplace add AgriciDaniel/claude-seo`
-- **Agent model and turn limits**: All 11 subagents now specify `model: sonnet` and `maxTurns` (15-25) for predictable cost and behavior
+- **Marketplace distribution**: Created `.claude-plugin/marketplace.json` for plugin marketplace submission. Users can now install via `/plugin marketplace add zhtyyx/codex-seo`
+- **Agent model and turn limits**: All 11 subagents now specify `model: default` and `maxTurns` (15-25) for predictable cost and behavior
 - **Plugin keywords**: Added 12 discovery keywords to `plugin.json` for marketplace searchability
 
 ### Changed
@@ -1492,8 +1502,8 @@ release. v2 will be a separate design conversation:
 ## [1.4.0] - 2026-03-12
 
 ### Security
-- **Install script supply chain fix**: Replaced `irm | iex` Windows PowerShell one-liner with `git clone + powershell -File` as primary install method. Claude Code's own security guardrails flagged the old pattern as a supply chain risk (reported by community member). Added collapsible "review before running" section for Unix curl method.
-- **Version pinning**: `install.sh` and `install.ps1` now clone a specific release tag (`v1.3.0`) by default rather than `main`, preventing silent updates. Override with `CLAUDE_SEO_TAG=main`.
+- **Install script supply chain fix**: Replaced `irm | iex` Windows PowerShell one-liner with `git clone + powershell -File` as primary install method. Codex CLI's own security guardrails flagged the old pattern as a supply chain risk (reported by community member). Added collapsible "review before running" section for Unix curl method.
+- **Version pinning**: `install.sh` and `install.ps1` now clone a specific release tag (`v1.3.0`) by default rather than `main`, preventing silent updates. Override with `CODEX_SEO_TAG=main`.
 - **PowerShell Invoke-External hardening**: Comprehensive `PSNativeCommandUseErrorActionPreference` handling in `Invoke-External` wrapper (fixes Windows git clone stderr false-positive termination, from PR #13 + PR #15).
 
 ### Added
@@ -1537,11 +1547,11 @@ release. v2 will be a separate design conversation:
 ## [1.2.1] - 2026-02-28
 
 ### Fixed
-- **User-Agent header**: Changed default from bot-style `ClaudeSEO/1.0` to Chrome-like string with `ClaudeSEO/1.2` suffix. SSR frameworks (Next.js, Nuxt, Angular) now pre-render properly instead of serving empty client-side shells (#9)
+- **User-Agent header**: Changed default from bot-style `CodexSEO/1.0` to Chrome-like string with `CodexSEO/1.2` suffix. SSR frameworks (Next.js, Nuxt, Angular) now pre-render properly instead of serving empty client-side shells (#9)
 - **Custom User-Agent support**: Added `--user-agent` flag to `fetch_page.py` for configurable UA strings
 
 ### Added
-- **install.cat support**: Added alternative install method via `curl install.cat/AgriciDaniel/claude-seo | bash` to README (#10)
+- **install.cat support**: Added alternative install method via `curl install.cat/zhtyyx/codex-seo | bash` to README (#10)
 
 ---
 
@@ -1551,7 +1561,7 @@ release. v2 will be a separate design conversation:
 - **SSRF prevention**: Added private IP blocking to `fetch_page.py` and `analyze_visual.py`
 - **Path traversal prevention**: Added output path sanitization to `capture_screenshot.py` and file validation to `parse_html.py`
 - **Install hardening**: Removed `--break-system-packages`, switched to venv-based pip install
-- **requirements.txt**: Now persisted to `~/.claude/skills/seo/` for user retry
+- **requirements.txt**: Now persisted to `~/.agents/skills/seo/` for user retry
 
 ### Fixed
 - **YAML frontmatter parsing**: Removed HTML comments before `---` delimiter in 8 files (skills: seo-content, seo-images, seo-programmatic, seo-schema, seo-technical; agents: seo-content, seo-performance, seo-technical). Thanks @kylewhirl for identifying this in the codex-seo fork.
@@ -1559,7 +1569,7 @@ release. v2 will be a separate design conversation:
 - **requirements.txt missing after install**: Now copied to skill directory so users can retry (#1)
 
 ### Changed
-- Python dependencies now installed in a venv at `~/.claude/skills/seo/.venv/` with `--user` fallback (#2)
+- Python dependencies now installed in a venv at `~/.agents/skills/seo/.venv/` with `--user` fallback (#2)
 - Playwright marked as explicitly optional in install output
 - Windows installer uses `Resolve-Python` helper for robust Python detection (#5)
 
@@ -1602,7 +1612,7 @@ release. v2 will be a separate design conversation:
 ## [1.0.0] - 2026-02-07
 
 ### Added
-- Initial release of Claude SEO
+- Initial release of Codex SEO
 - 9 specialized skills: audit, page, sitemap, schema, images, technical, content, geo, plan
 - 6 subagents for parallel analysis: seo-technical, seo-content, seo-schema, seo-sitemap, seo-performance, seo-visual
 - Industry templates: SaaS, local service, e-commerce, publisher, agency, generic
@@ -1624,7 +1634,7 @@ release. v2 will be a separate design conversation:
 - Bounded Python dependency pinning with CVE-aware minimums (lxml >= 5.3.2)
 
 ### Architecture
-- Follows Anthropic's official Claude Code skill specification (February 2026)
+- Follows Anthropic's official Codex CLI skill specification (February 2026)
 - Standard directory layout: `scripts/`, `references/`, `assets/`
 - Valid hook matchers (tool name only, no argument patterns)
 - Correct subagent frontmatter fields (name, description, tools)

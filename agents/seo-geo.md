@@ -1,7 +1,7 @@
 ---
 name: seo-geo
 description: GEO and AI search specialist. Analyzes AI crawler accessibility, llms.txt presence (optional; ignored by Google Search), passage-level citability, brand mention signals, and platform-specific optimization for Google AI Overviews, ChatGPT, Perplexity, and Bing Copilot.
-model: opus
+model: default
 maxTurns: 35
 tools: Read, Bash, WebFetch, Glob, Grep, Write
 ---
@@ -76,7 +76,7 @@ Provide a structured report with:
 
 ## Fetching pages (v2.0.0)
 
-Use `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run render_page.py <URL> --mode auto --json` for page HTML. `auto` does a raw fetch and only spins up Playwright when an SPA shell is detected; use `--mode always` to force a render or `--mode never` to skip Playwright entirely. The JSON exposes full `raw_content`, `content`, `extracted_text`, `is_spa`, and `publication_date`; use `--max-text` only when explicit bounded output is needed. SSRF and DNS-rebinding protection live in the bundled `url_safety.py` module, never call `requests.get` directly on user-supplied URLs.
+Use `"${CODEX_SEO_ROOT}/scripts/codex-seo" run render_page.py <URL> --mode auto --json` for page HTML. `auto` does a raw fetch and only spins up Playwright when an SPA shell is detected; use `--mode always` to force a render or `--mode never` to skip Playwright entirely. The JSON exposes full `raw_content`, `content`, `extracted_text`, `is_spa`, and `publication_date`; use `--max-text` only when explicit bounded output is needed. SSRF and DNS-rebinding protection live in the bundled `url_safety.py` module, never call `requests.get` directly on user-supplied URLs.
 
 AI citation analysis benefits from the `extracted_text` field, passage-level scoring should run against trafilatura's boilerplate-stripped output, not the full HTML, so navigation chrome and footers don't dilute the signal.
 

@@ -1,22 +1,22 @@
-# DataForSEO Extension Installer for Claude SEO (Windows)
+# DataForSEO Extension Installer for Codex SEO (Windows)
 # PowerShell installation script
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "|   DataForSEO Extension - Installer   |" -ForegroundColor Cyan
-Write-Host "|   For Claude SEO                     |" -ForegroundColor Cyan
+Write-Host "|   For Codex SEO                     |" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
 # Check prerequisites
-$SeoSkillDir = "$env:USERPROFILE\.claude\skills\seo"
+$SeoSkillDir = "$env:USERPROFILE\.agents\skills\seo"
 if (-not (Test-Path $SeoSkillDir)) {
-    Write-Host "[X] Claude SEO is not installed." -ForegroundColor Red
-    Write-Host "  Install it first: irm https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.ps1 | iex"
+    Write-Host "[X] Codex SEO is not installed." -ForegroundColor Red
+    Write-Host "  Install it first: irm https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.ps1 | iex"
     exit 1
 }
-Write-Host "[OK] Claude SEO detected" -ForegroundColor Green
+Write-Host "[OK] Codex SEO detected" -ForegroundColor Green
 
 $nodeCmd = Get-Command -Name node -ErrorAction SilentlyContinue
 if ($null -eq $nodeCmd) {
@@ -68,17 +68,17 @@ if (Test-Path "$ScriptDir\skills\seo-dataforseo\SKILL.md") {
     $SourceDir = "$ScriptDir\extensions\dataforseo"
 } else {
     Write-Host "[X] Cannot find extension source files." -ForegroundColor Red
-    Write-Host "  Run this script from the claude-seo repo."
+    Write-Host "  Run this script from the codex-seo repo."
     exit 1
 }
 
 # Set paths
-$SkillDir = "$env:USERPROFILE\.claude\skills\seo-dataforseo"
-$AgentDir = "$env:USERPROFILE\.claude\agents"
-# MCP servers live in ~/.claude.json (the file `claude mcp add` writes).
-# NOT ~/.claude/settings.json - `mcpServers` is not a key Claude Code reads
+$SkillDir = "$env:USERPROFILE\.agents\skills\seo-dataforseo"
+$AgentDir = "$env:USERPROFILE\.agents\skills\seo\agents"
+# MCP servers live in ~/.codex/config.toml (the file `codex mcp add` writes).
+# NOT ~/.codex/settings.json - `mcpServers` is not a key Codex CLI reads
 # there, so entries written to settings.json silently never load.
-$McpConfigFile = "$env:USERPROFILE\.claude.json"
+$McpConfigFile = "$env:USERPROFILE\.codex/config.toml"
 $FieldConfigPath = "$SeoSkillDir\dataforseo-field-config.json"
 
 # Install skill
@@ -96,39 +96,20 @@ Copy-Item -Force "$SourceDir\agents\seo-dataforseo.md" "$AgentDir\seo-dataforseo
 Write-Host "-> Installing field config..." -ForegroundColor Yellow
 Copy-Item -Force "$SourceDir\field-config.json" $FieldConfigPath
 
-# Merge MCP config into ~/.claude.json
-Write-Host "-> Configuring MCP server..." -ForegroundColor Yellow
-
-$settingsContent = if (Test-Path $McpConfigFile) { Get-Content $McpConfigFile -Raw | ConvertFrom-Json } else { [pscustomobject]@{} }
-if (-not $settingsContent.mcpServers) { $settingsContent | Add-Member -NotePropertyName mcpServers -NotePropertyValue ([pscustomobject]@{}) -Force }
-$settingsContent.mcpServers | Add-Member -NotePropertyName 'dataforseo' -NotePropertyValue @{
-    command = 'npx'
-    args = @('-y', 'dataforseo-mcp-server@2.8.10')
-    env = @{
-        DATAFORSEO_USERNAME = $DfseUsername
-        DATAFORSEO_PASSWORD = $DfsePassword
-        ENABLED_MODULES = 'SERP,KEYWORDS_DATA,ONPAGE,DATAFORSEO_LABS,BACKLINKS,DOMAIN_ANALYTICS,BUSINESS_DATA,CONTENT_ANALYSIS,AI_OPTIMIZATION'
-        FIELD_CONFIG_PATH = $FieldConfigPath
-    }
-} -Force
-# Write atomically: stage to a temp file in the same directory, then swap
-# it into place, so a crash mid-write never leaves ~/.claude.json truncated
-# or half-written (it is shared with Claude Code and other installers).
-# -Depth 100 (not the ConvertTo-Json default of 2) so an existing
-# ~/.claude.json with deeply nested config round-trips intact.
-$TempConfigFile = Join-Path (Split-Path -Parent $McpConfigFile) ".claude.json.$([guid]::NewGuid().ToString('N')).tmp"
-$jsonText = $settingsContent | ConvertTo-Json -Depth 100
-# Write without a byte-order mark: on Windows PowerShell 5.1, Set-Content -Encoding UTF8
-# emits a BOM and Node's JSON.parse rejects it, which would make ~/.claude.json unreadable.
-[System.IO.File]::WriteAllText($TempConfigFile, $jsonText, (New-Object System.Text.UTF8Encoding $false))
-Move-Item -Path $TempConfigFile -Destination $McpConfigFile -Force
-# Restrict the credential-bearing settings file to the current user only.
+$Helper = Join-Path $HOME ".agents/skills/seo/scripts/codex_config.py"
+if (-not (Test-Path $Helper)) { $Helper = Join-Path (Split-Path -Parent (Split-Path -Parent $SourceDir)) "scripts/codex_config.py" }
+if (-not (Test-Path $Helper)) { throw "codex_config.py not found (reinstall codex-seo)" }
+$env:DATAFORSEO_USERNAME = $DfseUsername
+$env:DATAFORSEO_PASSWORD = $DfsePassword
 try {
-    icacls $McpConfigFile /inheritance:r /grant:r "${env:USERNAME}:F" | Out-Null
-} catch {
-    Write-Host "  Note: could not restrict ~/.claude.json ACL; review manually." -ForegroundColor Yellow
+    python $Helper add dataforseo --command npx '--arg=-y' --arg 'dataforseo-mcp-server@2.8.10' --env 'ENABLED_MODULES=SERP,KEYWORDS_DATA,ONPAGE,DATAFORSEO_LABS,BACKLINKS,DOMAIN_ANALYTICS,BUSINESS_DATA,CONTENT_ANALYSIS,AI_OPTIMIZATION' --env "FIELD_CONFIG_PATH=$FieldConfigPath" --env-pass DATAFORSEO_USERNAME --env-pass DATAFORSEO_PASSWORD --config-path $McpConfigFile
+    if ($LASTEXITCODE -ne 0) { throw "Nothing was saved (python exited $LASTEXITCODE). See the message above." }
+} finally {
+    Remove-Item Env:DATAFORSEO_USERNAME -ErrorAction SilentlyContinue
+    Remove-Item Env:DATAFORSEO_PASSWORD -ErrorAction SilentlyContinue
 }
-Write-Host "  [OK] MCP server configured in ~/.claude.json" -ForegroundColor Green
+Write-Host "  [OK] MCP server configured in ~/.codex/config.toml" -ForegroundColor Green
+Write-Host "  [OK] MCP server configured in ~/.codex/config.toml" -ForegroundColor Green
 
 # Pre-warm npx package
 Write-Host "-> Pre-downloading dataforseo-mcp-server..." -ForegroundColor Yellow
@@ -142,7 +123,7 @@ Write-Host ""
 Write-Host "[OK] DataForSEO extension installed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Usage:" -ForegroundColor Cyan
-Write-Host "  1. Start Claude Code:  claude"
+Write-Host "  1. Start Codex CLI:  codex"
 Write-Host "  2. Run commands:"
 Write-Host "     /seo dataforseo serp best coffee shops"
 Write-Host "     /seo dataforseo keywords seo tools"

@@ -1,6 +1,6 @@
 {
- "requestedUrl": "https://claude-seo.md/",
- "finalDisplayedUrl": "https://claude-seo.md/",
+ "requestedUrl": "https://github.com/zhtyyx/codex-seo/",
+ "finalDisplayedUrl": "https://github.com/zhtyyx/codex-seo/",
  "lighthouseVersion": "13.5.0",
  "fetchTime": "2026-09-23T18:03:56.534Z",
  "configSettings": {
@@ -138,21 +138,21 @@
         {
          "tool": "search_skills",
          "inputSchema": "{}",
-         "description": "Search Claude SEO's skill pages by name or description and return up to 5 matching skills with slug, name, summary, and URL. Read-only. Does not change the page or send data anywhere."
+         "description": "Search Codex SEO's skill pages by name or description and return up to 5 matching skills with slug, name, summary, and URL. Read-only. Does not change the page or send data anywhere."
         },
         {
-         "description": "Return one Claude SEO skill's name, one line summary, canonical URL, and exact slash commands, given the skill's URL slug.",
+         "description": "Return one Codex SEO skill's name, one line summary, canonical URL, and exact slash commands, given the skill's URL slug.",
          "inputSchema": "{}",
          "tool": "get_skill"
         },
         {
          "inputSchema": "{}",
-         "description": "Return the exact Claude SEO install commands shown on this site, optionally filtered to one platform.",
+         "description": "Return the exact Codex SEO install commands shown on this site, optionally filtered to one platform.",
          "tool": "get_install_command"
         },
         {
          "inputSchema": "{}",
-         "description": "Return the current Claude SEO version, its release date, and the URL of the release announcement post.",
+         "description": "Return the current Codex SEO version, its release date, and the URL of the release announcement post.",
          "tool": "get_latest_release"
         }
        ],

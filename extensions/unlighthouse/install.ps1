@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw "Python 3 required" }
 if (-not (Get-Command npx -ErrorAction SilentlyContinue))    { throw "Node 18+ / npx required" }
-$SkillDir = Join-Path $HOME ".claude/skills"
-if (-not (Test-Path (Join-Path $SkillDir "seo"))) { throw "claude-seo not installed" }
+$SkillDir = Join-Path $HOME ".agents/skills"
+if (-not (Test-Path (Join-Path $SkillDir "seo"))) { throw "codex-seo not installed" }
 $SourceDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $SkillTarget = Join-Path $SkillDir "seo-unlighthouse"
 New-Item -ItemType Directory -Path $SkillTarget -Force | Out-Null

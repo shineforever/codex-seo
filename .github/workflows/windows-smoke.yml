@@ -7,7 +7,7 @@ on:
       - ".github/workflows/windows-smoke.yml"
       - "install.ps1"
       - "uninstall.ps1"
-      - "scripts/claude-seo"
+      - "scripts/codex-seo"
       - "requirements.txt"
       - "scripts/runtime.py"
       - "scripts/seo_updates.py"
@@ -51,7 +51,7 @@ jobs:
             exit 1
           fi
           git ls-remote --exit-code --refs \
-            https://github.com/AgriciDaniel/claude-seo.git \
+            https://github.com/zhtyyx/codex-seo.git \
             "refs/heads/$TARGET_REF" "refs/tags/$TARGET_REF" >/dev/null
           printf 'ref=%s\n' "$TARGET_REF" >> "$GITHUB_OUTPUT"
 
@@ -91,18 +91,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Pin the installer to setup-python through CLAUDE_SEO_PYTHON
+      - name: Pin the installer to setup-python through CODEX_SEO_PYTHON
         shell: pwsh
         env:
           PYTHON_PATH: ${{ steps.py.outputs.python-path }}
         run: |
-          "CLAUDE_SEO_PYTHON=$env:PYTHON_PATH" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "CODEX_SEO_PYTHON=$env:PYTHON_PATH" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Prepare isolated user profile
         shell: pwsh
         run: |
-          $profileRoot = Join-Path $env:RUNNER_TEMP "claude-seo-smoke-profile"
-          $tempRoot = Join-Path $env:RUNNER_TEMP "claude-seo-smoke-temp"
+          $profileRoot = Join-Path $env:RUNNER_TEMP "codex-seo-smoke-profile"
+          $tempRoot = Join-Path $env:RUNNER_TEMP "codex-seo-smoke-temp"
           Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $profileRoot, $tempRoot
           New-Item -ItemType Directory -Force -Path $profileRoot, $tempRoot | Out-Null
           "USERPROFILE=$profileRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -113,11 +113,11 @@ jobs:
       - name: Install released manual package
         shell: pwsh
         env:
-          CLAUDE_SEO_TAG: ${{ needs.validate-ref.outputs.ref }}
+          CODEX_SEO_TAG: ${{ needs.validate-ref.outputs.ref }}
         run: |
           $ErrorActionPreference = "Stop"
           ./install.ps1
-          $skillRoot = Join-Path $env:USERPROFILE ".claude\skills\seo"
+          $skillRoot = Join-Path $env:USERPROFILE ".agents\skills\seo"
           $required = @(
             "SKILL.md",
             "requirements.txt",
@@ -136,7 +136,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $skillRoot = Join-Path $env:USERPROFILE ".claude\skills\seo"
+          $skillRoot = Join-Path $env:USERPROFILE ".agents\skills\seo"
           $runtime = Join-Path $skillRoot "scripts\runtime.py"
           # Run the runtime with the interpreter the installer chose, read from
           # the venv it built. 'py -3' may be a different, unsupported Python.
@@ -145,9 +145,9 @@ jobs:
           $version = (($cfg | Where-Object { $_ -match '^version\s*=' }) -split '=', 2)[1].Trim()
           if ($version -notmatch '^3\.(1[1-4])\.') { throw "Installer chose unsupported Python $version" }
           # pyvenv.cfg records the realpath, so compare against the override's realpath.
-          $override = if ($env:CLAUDE_SEO_PYTHON) { & $env:CLAUDE_SEO_PYTHON -c "import os, sys; print(os.path.realpath(sys.executable))" }
+          $override = if ($env:CODEX_SEO_PYTHON) { & $env:CODEX_SEO_PYTHON -c "import os, sys; print(os.path.realpath(sys.executable))" }
           if ($override -and ($python -ne $override.Trim())) {
-            throw "Installer ignored CLAUDE_SEO_PYTHON ($python)"
+            throw "Installer ignored CODEX_SEO_PYTHON ($python)"
           }
           Write-Host "Installer chose Python $version at $python"
           $doctor = & $python $runtime doctor --json
@@ -162,12 +162,12 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $skills = Join-Path $env:USERPROFILE ".claude\skills"
-          $agents = Join-Path $env:USERPROFILE ".claude\agents"
+          $skills = Join-Path $env:USERPROFILE ".agents\skills"
+          $agents = Join-Path $env:USERPROFILE ".agents\skills\seo\agents"
           $expectedSkillDirs = @(Get-ChildItem -Path $skills -Directory -Filter "seo" -ErrorAction SilentlyContinue).Count + @(Get-ChildItem -Path $skills -Directory -Filter "seo-*" -ErrorAction SilentlyContinue).Count
           $expectedAgentFiles = @(Get-ChildItem -Path $agents -File -Filter "seo-*.md" -ErrorAction SilentlyContinue).Count
           $uninstallOutput = & ./uninstall.ps1 6>&1 | Out-String
-          $expectedSummary = "claude-seo uninstalled ($expectedSkillDirs skill dirs, $expectedAgentFiles agent files)"
+          $expectedSummary = "codex-seo uninstalled ($expectedSkillDirs skill dirs, $expectedAgentFiles agent files)"
           if ($uninstallOutput -notmatch [regex]::Escape($expectedSummary)) {
             throw "Uninstaller summary did not report all removed entries. Output: $uninstallOutput"
           }
@@ -184,7 +184,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path (Join-Path $skills "seo-local"), (Join-Path $skills "seo-maps") | Out-Null
           New-Item -ItemType File -Force -Path (Join-Path $agents "seo-local.md"), (Join-Path $agents "seo-maps.md") | Out-Null
           $partialOutput = & ./uninstall.ps1 6>&1 | Out-String
-          $partialSummary = "claude-seo uninstalled (2 skill dirs, 2 agent files)"
+          $partialSummary = "codex-seo uninstalled (2 skill dirs, 2 agent files)"
           if ($partialOutput -notmatch [regex]::Escape($partialSummary)) {
             throw "Partial-install summary was incorrect. Output: $partialOutput"
           }
@@ -201,8 +201,8 @@ jobs:
         shell: pwsh
         run: |
           $paths = @(
-            (Join-Path $env:RUNNER_TEMP "claude-seo-smoke-profile"),
-            (Join-Path $env:RUNNER_TEMP "claude-seo-smoke-temp")
+            (Join-Path $env:RUNNER_TEMP "codex-seo-smoke-profile"),
+            (Join-Path $env:RUNNER_TEMP "codex-seo-smoke-temp")
           )
           Remove-Item -Recurse -Force -ErrorAction SilentlyContinue -Path $paths
 
@@ -237,7 +237,7 @@ jobs:
           Write-Host "All extension PowerShell scripts parse."
 
       - name: Set up Python 3.11
-        # No CLAUDE_SEO_PYTHON here: the image's 'py -3' may be newer than the
+        # No CODEX_SEO_PYTHON here: the image's 'py -3' may be newer than the
         # supported range, and the installer must fall back on its own.
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -259,8 +259,8 @@ jobs:
       - name: Prepare isolated user profile
         shell: powershell
         run: |
-          $profileRoot = Join-Path $env:RUNNER_TEMP "claude-seo-smoke-profile"
-          $tempRoot = Join-Path $env:RUNNER_TEMP "claude-seo-smoke-temp"
+          $profileRoot = Join-Path $env:RUNNER_TEMP "codex-seo-smoke-profile"
+          $tempRoot = Join-Path $env:RUNNER_TEMP "codex-seo-smoke-temp"
           Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $profileRoot, $tempRoot
           New-Item -ItemType Directory -Force -Path $profileRoot, $tempRoot | Out-Null
           "USERPROFILE=$profileRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -271,11 +271,11 @@ jobs:
       - name: Install released manual package
         shell: powershell
         env:
-          CLAUDE_SEO_TAG: ${{ needs.validate-ref.outputs.ref }}
+          CODEX_SEO_TAG: ${{ needs.validate-ref.outputs.ref }}
         run: |
           $ErrorActionPreference = "Stop"
           ./install.ps1
-          $skillRoot = Join-Path $env:USERPROFILE ".claude\skills\seo"
+          $skillRoot = Join-Path $env:USERPROFILE ".agents\skills\seo"
           $required = @(
             "SKILL.md",
             "requirements.txt",
@@ -294,7 +294,7 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference = "Stop"
-          $skillRoot = Join-Path $env:USERPROFILE ".claude\skills\seo"
+          $skillRoot = Join-Path $env:USERPROFILE ".agents\skills\seo"
           $runtime = Join-Path $skillRoot "scripts\runtime.py"
           # Run the runtime with the interpreter the installer chose, read from
           # the venv it built. 'py -3' may be a different, unsupported Python.
@@ -303,9 +303,9 @@ jobs:
           $version = (($cfg | Where-Object { $_ -match '^version\s*=' }) -split '=', 2)[1].Trim()
           if ($version -notmatch '^3\.(1[1-4])\.') { throw "Installer chose unsupported Python $version" }
           # pyvenv.cfg records the realpath, so compare against the override's realpath.
-          $override = if ($env:CLAUDE_SEO_PYTHON) { & $env:CLAUDE_SEO_PYTHON -c "import os, sys; print(os.path.realpath(sys.executable))" }
+          $override = if ($env:CODEX_SEO_PYTHON) { & $env:CODEX_SEO_PYTHON -c "import os, sys; print(os.path.realpath(sys.executable))" }
           if ($override -and ($python -ne $override.Trim())) {
-            throw "Installer ignored CLAUDE_SEO_PYTHON ($python)"
+            throw "Installer ignored CODEX_SEO_PYTHON ($python)"
           }
           Write-Host "Installer chose Python $version at $python"
           $doctor = & $python $runtime doctor --json
@@ -320,12 +320,12 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference = "Stop"
-          $skills = Join-Path $env:USERPROFILE ".claude\skills"
-          $agents = Join-Path $env:USERPROFILE ".claude\agents"
+          $skills = Join-Path $env:USERPROFILE ".agents\skills"
+          $agents = Join-Path $env:USERPROFILE ".agents\skills\seo\agents"
           $expectedSkillDirs = @(Get-ChildItem -Path $skills -Directory -Filter "seo" -ErrorAction SilentlyContinue).Count + @(Get-ChildItem -Path $skills -Directory -Filter "seo-*" -ErrorAction SilentlyContinue).Count
           $expectedAgentFiles = @(Get-ChildItem -Path $agents -File -Filter "seo-*.md" -ErrorAction SilentlyContinue).Count
           $uninstallOutput = & ./uninstall.ps1 6>&1 | Out-String
-          $expectedSummary = "claude-seo uninstalled ($expectedSkillDirs skill dirs, $expectedAgentFiles agent files)"
+          $expectedSummary = "codex-seo uninstalled ($expectedSkillDirs skill dirs, $expectedAgentFiles agent files)"
           if ($uninstallOutput -notmatch [regex]::Escape($expectedSummary)) {
             throw "Uninstaller summary did not report all removed entries. Output: $uninstallOutput"
           }
@@ -342,7 +342,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path (Join-Path $skills "seo-local"), (Join-Path $skills "seo-maps") | Out-Null
           New-Item -ItemType File -Force -Path (Join-Path $agents "seo-local.md"), (Join-Path $agents "seo-maps.md") | Out-Null
           $partialOutput = & ./uninstall.ps1 6>&1 | Out-String
-          $partialSummary = "claude-seo uninstalled (2 skill dirs, 2 agent files)"
+          $partialSummary = "codex-seo uninstalled (2 skill dirs, 2 agent files)"
           if ($partialOutput -notmatch [regex]::Escape($partialSummary)) {
             throw "Partial-install summary was incorrect. Output: $partialOutput"
           }
@@ -359,7 +359,7 @@ jobs:
         shell: powershell
         run: |
           $paths = @(
-            (Join-Path $env:RUNNER_TEMP "claude-seo-smoke-profile"),
-            (Join-Path $env:RUNNER_TEMP "claude-seo-smoke-temp")
+            (Join-Path $env:RUNNER_TEMP "codex-seo-smoke-profile"),
+            (Join-Path $env:RUNNER_TEMP "codex-seo-smoke-temp")
           )
           Remove-Item -Recurse -Force -ErrorAction SilentlyContinue -Path $paths

@@ -4,9 +4,9 @@
 
 1. **Bing Webmaster Tools API**: inbound links, crawl stats, search
    keywords, and competitor link comparison via
-   `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run bing_webmaster.py` (already shipped with claude-seo).
+   `"${CODEX_SEO_ROOT}/scripts/codex-seo" run bing_webmaster.py` (already shipped with codex-seo).
 2. **IndexNow URL submission** for Amazon, Bing, Naver, Seznam.cz,
-   Yandex, and Yep via `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run indexnow_submit.py`.
+   Yandex, and Yep via `"${CODEX_SEO_ROOT}/scripts/codex-seo" run indexnow_submit.py`.
 3. A unified `seo-bing` skill that routes the right command at the
    right script.
 
@@ -53,9 +53,9 @@ guarantee indexing speed.
 
 PowerShell manual removal:
 ```powershell
-Remove-Item -Recurse -Force "$HOME\.claude\skills\seo-bing"
-notepad "$HOME\.claude\settings.json"
+Remove-Item -Recurse -Force "$HOME\.agents\skills\seo-bing"
+notepad "$HOME\.config\codex-seo\env.json"
 ```
 
-In `settings.json`, remove `BING_WEBMASTER_API_KEY`, `INDEXNOW_KEY`, and
-`INDEXNOW_KEY_LOCATION` from the top-level `env` object.
+In `env.json`, remove `BING_WEBMASTER_API_KEY`, `INDEXNOW_KEY`, and
+`INDEXNOW_KEY_LOCATION`.

@@ -36,11 +36,11 @@ body:
       required: true
 
   - type: textarea
-    id: context_for_claude
+    id: context_for_agent
     attributes:
-      label: Claude Code Context
+      label: Codex CLI Context
       description: >
-        Background that Claude Code should read before starting work.
+        Background that Codex CLI should read before starting work.
         List relevant files, known patterns, prior decisions, or constraints.
       placeholder: |
         - Related files: skills/seo-foo/SKILL.md, scripts/bar.py

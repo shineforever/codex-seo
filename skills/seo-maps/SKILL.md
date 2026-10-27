@@ -8,8 +8,6 @@ description: >
   DataForSEO, and DataForSEO + Google. Use when user says "maps", "geo-grid",
   "rank tracking", "GBP audit", "review velocity", "competitor radius", or
   "SoLV".
-user-invocable: true
-argument-hint: "[command] [url|keyword|location]"
 license: MIT
 compatibility: "DataForSEO MCP for Tier 1+, Google Maps API for Tier 2"
 metadata:

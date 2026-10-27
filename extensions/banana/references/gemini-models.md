@@ -121,7 +121,7 @@ Verify current rate limits in Google-owned docs before planning batch work.
 
 Do not use hard-coded pricing assumptions. Verify current pricing at
 https://ai.google.dev/gemini-api/docs/pricing and store dated values in
-`~/.banana/pricing.json` via `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run --extension banana cost_tracker.py`.
+`~/.banana/pricing.json` via `"${CODEX_SEO_ROOT}/scripts/codex-seo" run --extension banana cost_tracker.py`.
 
 ## Image Output Specs
 
@@ -160,5 +160,5 @@ Gemini uses a two-layer safety architecture:
 - No transparent backgrounds (PNG but always with background)
 - Text rendering quality varies; keep text under 25 characters for best results
 - Safety filters may block some prompts (violence, NSFW, public figures), known to be overly cautious
-- Session context resets between Claude Code conversations
+- Session context resets between Codex CLI conversations
 - `imageSize` and thinking level depend on MCP package version support

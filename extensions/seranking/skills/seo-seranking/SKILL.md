@@ -14,7 +14,7 @@ Live AI visibility tracking via the SE Ranking REST API.
 
 - Run `extensions/seranking/install.sh` (or `install.ps1`).
 - An SE Ranking API key (https://seranking.com/api.html).
-- Before any call, verify `SERANKING_API_KEY` is present in `~/.claude/settings.json` under `env.`. If absent, tell the user to run the installer.
+- Before any call, verify `SERANKING_API_KEY` is present in `~/.codex/settings.json` under `env.`. If absent, tell the user to run the installer.
 
 ## Routing
 
@@ -42,7 +42,7 @@ Report each as a percentage with a confidence note based on sample size.
 ## Cost guardrails
 
 SE Ranking API uses unit accounting. Single AI visibility query is
-~5 units (1 per platform). Use `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run dataforseo_costs.py` to log
+~5 units (1 per platform). Use `"${CODEX_SEO_ROOT}/scripts/codex-seo" run dataforseo_costs.py` to log
 spend across vendors.
 
 ## Cross-skill delegation

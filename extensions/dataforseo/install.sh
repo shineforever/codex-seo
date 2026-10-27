@@ -1,44 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# DataForSEO Extension Installer for Claude SEO
+# DataForSEO Extension Installer for Codex SEO
 # Wraps everything in main() to prevent partial execution on network failure
 
 main() {
-    SKILL_DIR="${HOME}/.claude/skills/seo-dataforseo"
-    AGENT_DIR="${HOME}/.claude/agents"
-    SEO_SKILL_DIR="${HOME}/.claude/skills/seo"
-    # MCP servers live in ~/.claude.json (the file `claude mcp add` writes).
-    # NOT ~/.claude/settings.json - `mcpServers` is not a key Claude Code reads
+    SKILL_DIR="${HOME}/.agents/skills/seo-dataforseo"
+    AGENT_DIR="${HOME}/.agents/skills/seo/agents"
+    SEO_SKILL_DIR="${HOME}/.agents/skills/seo"
+    # MCP servers live in ~/.codex/config.toml (the file `codex mcp add` writes).
+    # NOT ~/.codex/settings.json - `mcpServers` is not a key Codex CLI reads
     # there, so entries written to settings.json silently never load.
-    MCP_CONFIG_FILE="${HOME}/.claude.json"
+    MCP_CONFIG_FILE="${HOME}/.codex/config.toml"
 
     echo "════════════════════════════════════════"
     echo "║   DataForSEO Extension - Installer   ║"
-    echo "║   For Claude SEO                     ║"
+    echo "║   For Codex SEO                     ║"
     echo "════════════════════════════════════════"
     echo ""
 
-    # Support both traditional (curl|bash → ~/.claude/skills/seo) and marketplace
-    # (plugin install → ~/.claude/plugins/cache/.../skills/seo) installations.
-    # Resolve early using BASH_SOURCE so it works even when run from the plugin cache.
+    # Resolve the hub skill dir early: prefer the installed copy, fall back
+    # to a repository checkout two levels up from this script.
     _EARLY_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    _PLUGIN_SEO_DIR="$(cd "${_EARLY_SCRIPT_DIR}/../.." 2>/dev/null && pwd)/skills/seo"
-    if [ ! -d "${SEO_SKILL_DIR}" ] && [ -d "${_PLUGIN_SEO_DIR}" ]; then
-        SEO_SKILL_DIR="${_PLUGIN_SEO_DIR}"
-    fi
-    if [ ! -d "${SEO_SKILL_DIR}" ]; then
-        _GLOB_MATCH=$(ls -d "${HOME}/.claude/plugins/cache/*/claude-seo/"*/skills/seo 2>/dev/null | tail -n1 || true)
-        [ -n "${_GLOB_MATCH}" ] && [ -d "${_GLOB_MATCH}" ] && SEO_SKILL_DIR="${_GLOB_MATCH}"
+    _REPO_SEO_DIR="$(cd "${_EARLY_SCRIPT_DIR}/../.." 2>/dev/null && pwd)/skills/seo"
+    if [ ! -d "${SEO_SKILL_DIR}" ] && [ -d "${_REPO_SEO_DIR}" ]; then
+        SEO_SKILL_DIR="${_REPO_SEO_DIR}"
     fi
 
     # Check prerequisites
     if [ ! -d "${SEO_SKILL_DIR}" ]; then
-        echo "✗ Claude SEO is not installed."
-        echo "  Install it first: curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash"
+        echo "✗ Codex SEO is not installed."
+        echo "  Install it first: curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh | bash"
         exit 1
     fi
-    echo "✓ Claude SEO detected"
+    echo "✓ Codex SEO detected"
 
     if ! command -v node >/dev/null 2>&1; then
         echo "✗ Node.js is required but not installed."
@@ -89,7 +84,7 @@ main() {
         SOURCE_DIR="${SCRIPT_DIR}/extensions/dataforseo"
     else
         echo "✗ Cannot find extension source files."
-        echo "  Run this script from the claude-seo repo: ./extensions/dataforseo/install.sh"
+        echo "  Run this script from the codex-seo repo: ./extensions/dataforseo/install.sh"
         exit 1
     fi
 
@@ -108,56 +103,28 @@ main() {
     echo "→ Installing field config..."
     cp "${SOURCE_DIR}/field-config.json" "${SEO_SKILL_DIR}/dataforseo-field-config.json"
 
-    # Merge MCP config into ~/.claude.json
+    # Merge MCP config into ~/.codex/config.toml
     echo "→ Configuring MCP server..."
     FIELD_CONFIG_PATH="${SEO_SKILL_DIR}/dataforseo-field-config.json"
 
     # Credentials travel in the environment (never argv, never interpolated into the source string)
     # and the settings file is written atomically with 0600 permissions.
-    CLAUDE_SEO_USERNAME="${DFSE_USERNAME}" CLAUDE_SEO_SECRET="${DFSE_PASSWORD}" python3 - "${MCP_CONFIG_FILE}" "${FIELD_CONFIG_PATH}" <<'PY'
-import json, os, sys, tempfile
-
-settings_path, field_config = sys.argv[1:3]
-username = os.environ["CLAUDE_SEO_USERNAME"]
-password = os.environ["CLAUDE_SEO_SECRET"]
-
-if os.path.exists(settings_path):
-    try:
-        with open(settings_path) as f:
-            settings = json.load(f)
-    except json.JSONDecodeError:
-        sys.exit(f"✗ {settings_path} is not valid JSON. Nothing was changed; fix it and rerun.")
-else:
-    settings = {}
-
-settings.setdefault('mcpServers', {})['dataforseo'] = {
-    'command': 'npx',
-    'args': ['-y', 'dataforseo-mcp-server@2.8.10'],
-    'env': {
-        'DATAFORSEO_USERNAME': username,
-        'DATAFORSEO_PASSWORD': password,
-        'ENABLED_MODULES': 'SERP,KEYWORDS_DATA,ONPAGE,DATAFORSEO_LABS,BACKLINKS,DOMAIN_ANALYTICS,BUSINESS_DATA,CONTENT_ANALYSIS,AI_OPTIMIZATION',
-        'FIELD_CONFIG_PATH': field_config,
-    },
-}
-
-os.makedirs(os.path.dirname(settings_path) or '.', exist_ok=True)
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(settings_path) or '.', prefix='.settings.', suffix='.json')
-try:
-    with os.fdopen(fd, 'w') as f:
-        json.dump(settings, f, indent=2)
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, settings_path)
-except Exception:
-    if os.path.exists(tmp):
-        os.unlink(tmp)
-    raise
-
-print('  ✓ MCP server configured in ~/.claude.json')
-PY
+    HELPER="${SEO_SKILL_DIR:-${SKILL_DIR}/seo}/scripts/codex_config.py"
+    [ -f "${HELPER}" ] || HELPER="${SOURCE_DIR}/../../scripts/codex_config.py"
+    DATAFORSEO_USERNAME="${DFSE_USERNAME}" DATAFORSEO_PASSWORD="${DFSE_PASSWORD}" \
+    python3 "${HELPER}" add dataforseo --command npx \
+        --arg=-y --arg 'dataforseo-mcp-server@2.8.10' \
+        --env 'ENABLED_MODULES=SERP,KEYWORDS_DATA,ONPAGE,DATAFORSEO_LABS,BACKLINKS,DOMAIN_ANALYTICS,BUSINESS_DATA,CONTENT_ANALYSIS,AI_OPTIMIZATION' \
+        --env "FIELD_CONFIG_PATH=${FIELD_CONFIG_PATH}" \
+        --env-pass DATAFORSEO_USERNAME --env-pass DATAFORSEO_PASSWORD \
+        --config-path "${MCP_CONFIG_FILE}" || {
+        echo "  ⚠  Could not auto-configure MCP server."
+        echo "  Add the dataforseo server manually to ${MCP_CONFIG_FILE}"
+        echo "  See: extensions/dataforseo/docs/DATAFORSEO-SETUP.md"
+    }
     if [ $? -ne 0 ]; then
         echo "  ⚠  Could not auto-configure MCP server."
-        echo "  Add the dataforseo server manually to ~/.claude.json"
+        echo "  Add the dataforseo server manually to ~/.codex/config.toml"
         echo "  See: extensions/dataforseo/docs/DATAFORSEO-SETUP.md"
     fi
 
@@ -169,7 +136,7 @@ PY
     echo "✓ DataForSEO extension installed successfully!"
     echo ""
     echo "Usage:"
-    echo "  1. Start Claude Code:  claude"
+    echo "  1. Start Codex CLI:  codex"
     echo "  2. Run commands:"
     echo "     /seo dataforseo serp best coffee shops"
     echo "     /seo dataforseo keywords seo tools"

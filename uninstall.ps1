@@ -1,16 +1,14 @@
 #!/usr/bin/env pwsh
-# claude-seo manual-install uninstaller (Windows)
+# codex-seo manual-install uninstaller (Windows)
 #
-# Removes the orchestrator skill (~/.claude/skills/seo), all sub-skills
-# (~/.claude/skills/seo-*), and all sub-agents (~/.claude/agents/seo-*.md).
+# Removes the orchestrator skill (~/.agents/skills/seo), all sub-skills
+# (~/.agents/skills/seo-*), and all sub-agents (~/.agents/skills/seo/agents/seo-*.md).
 #
 # Uses glob enumeration rather than a hardcoded list so future skill
 # additions are cleaned up automatically without releasing a new
 # uninstaller.
 #
-# Plugin-install users should use Claude Code's own command instead:
-#   /plugin uninstall claude-seo@agricidaniel-claude-seo
-#   /plugin marketplace remove AgriciDaniel/claude-seo
+# The /seo custom prompt (~/.codex/prompts/seo.md) is removed too.
 
 $ErrorActionPreference = "Stop"
 
@@ -19,10 +17,10 @@ function Write-Color($Color, $Text) {
 }
 
 function Main {
-    $SkillDir = Join-Path (Join-Path $env:USERPROFILE ".claude") "skills"
-    $AgentDir = Join-Path (Join-Path $env:USERPROFILE ".claude") "agents"
+    $SkillDir = Join-Path (Join-Path $env:USERPROFILE ".agents") "skills"
+    $AgentDir = Join-Path (Join-Path (Join-Path $env:USERPROFILE ".agents") "skills") "seo\agents"
 
-    Write-Color Cyan "=== Uninstalling claude-seo ==="
+    Write-Color Cyan "=== Uninstalling codex-seo ==="
     Write-Host ""
 
     $removedSkills = 0
@@ -45,6 +43,13 @@ function Main {
         }
     }
 
+    # Remove the /seo custom prompt
+    $PromptFile = Join-Path (Join-Path (Join-Path $env:USERPROFILE ".codex") "prompts") "seo.md"
+    if (Test-Path $PromptFile -PathType Leaf) {
+        Remove-Item -Force $PromptFile
+        Write-Color Green "  Removed: $PromptFile"
+    }
+
     # Remove every seo-*.md agent file
     if (Test-Path $AgentDir -PathType Container) {
         foreach ($agentFile in @(Get-ChildItem -Path $AgentDir -File -Filter "seo-*.md" -ErrorAction SilentlyContinue)) {
@@ -56,14 +61,13 @@ function Main {
 
     Write-Host ""
     if ($removedSkills -eq 0 -and $removedAgents -eq 0) {
-        Write-Color Yellow "Nothing to remove. Claude SEO does not appear to be installed."
-        Write-Color Yellow "If you installed via /plugin install, run /plugin uninstall instead."
+        Write-Color Yellow "Nothing to remove. Codex SEO does not appear to be installed."
         return
     }
 
-    Write-Color Cyan "=== claude-seo uninstalled ($removedSkills skill dirs, $removedAgents agent files) ==="
+    Write-Color Cyan "=== codex-seo uninstalled ($removedSkills skill dirs, $removedAgents agent files) ==="
     Write-Host ""
-    Write-Color Yellow "Restart Claude Code to complete removal."
+    Write-Color Yellow "Restart Codex CLI to complete removal."
 }
 
 Main

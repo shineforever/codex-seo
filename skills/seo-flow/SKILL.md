@@ -6,8 +6,6 @@ description: >
   knowledge base (41 prompts, CC BY 4.0). Use when user says "FLOW", "FLOW
   framework", "seo flow", "evidence-led SEO", "find leverage optimize win",
   or wants stage-specific SEO prompts.
-user-invocable: true
-argument-hint: "[stage] [url|topic]"
 license: MIT
 metadata:
   author: AgriciDaniel
@@ -17,7 +15,7 @@ metadata:
 
 # FLOW Framework: Find · Leverage · Optimize · Win
 
-FLOW is an evidence-led SEO operating model built for the AI-search era. Claude SEO
+FLOW is an evidence-led SEO operating model built for the AI-search era. Codex SEO
 integrates the FLOW prompt library (41 prompts across 5 stages) so every analysis can
 be driven by structured, evidence-backed AI prompts rather than improvised queries.
 
@@ -82,7 +80,7 @@ Load prompt files on demand, only for the stage the user requests.
 2. Display the full index: all 41 prompts with stage, name, trigger conditions
 
 ### On `/seo flow sync`
-1. Run: `"${CLAUDE_PLUGIN_ROOT}/scripts/claude-seo" run sync_flow.py`
+1. Run: `"${CODEX_SEO_ROOT}/scripts/codex-seo" run sync_flow.py`
 2. Display the JSON summary (files added, updated, unchanged)
 3. Show attribution notice after sync completes
 

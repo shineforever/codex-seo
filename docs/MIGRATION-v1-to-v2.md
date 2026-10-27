@@ -1,4 +1,4 @@
-# Migrating from claude-seo v1.x to v2.0.0
+# Migrating from codex-seo v1.x to v2.0.0
 
 v2 is **backward-compatible by design**. Every v1.x CLI invocation, every
 script signature, and every skill command still works. The breaking
@@ -72,7 +72,7 @@ releases are documented in [../CHANGELOG.md](../CHANGELOG.md).
 | New | What it does |
 |---|---|
 | `python3 scripts/parasite_risk.py` | Site-reputation-abuse risk scanner per Nov 2024 Google policy |
-| `extensions/ahrefs/` | Official `@ahrefs/mcp` server wired into Claude Code |
+| `extensions/ahrefs/` | Official `@ahrefs/mcp` server wired into Codex CLI |
 | `extensions/seranking/` | AI Share-of-Voice across ChatGPT/Gemini/Perplexity/AI Overviews/AI Mode |
 | `extensions/profound/` | Time-series LLM citation tracker |
 | `extensions/bing-webmaster/` | Bing Webmaster + IndexNow unified |
@@ -165,7 +165,7 @@ Caution: Prefer downloading, inspecting, then running remote scripts; the pipe-t
 
 ```bash
 # Pull v2.0.0
-curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh | bash
 
 # Verify the new requirements pin landed
 pip install -r requirements.txt
@@ -178,7 +178,7 @@ python3 -m pytest tests/test_manifest_consistency.py -v
 ```
 
 That's it. The first time you run anything that touches
-`~/.config/claude-seo/oauth-token.json`, v2 will silently re-chmod it
+`~/.config/codex-seo/oauth-token.json`, v2 will silently re-chmod it
 to `0o600`, no user action required.
 
 ## Test coverage
