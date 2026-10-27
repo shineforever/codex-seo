@@ -9,6 +9,7 @@ Free, open-source SEO audits inside [OpenAI Codex CLI](https://developers.openai
   <a href="https://developers.openai.com/codex"><img src="https://img.shields.io/badge/Codex%20CLI-Skills-blue" alt="Codex CLI skills" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://github.com/AgriciDaniel/claude-seo"><img src="https://img.shields.io/badge/port%20of-claude--seo-8A2BE2" alt="Port of claude-seo" /></a>
+  <a href="https://linux.do/"><img src="https://img.shields.io/badge/Linux.do-Community-2b6de8" alt="Linux.do Community" /></a>
 </p>
 
 Give it any website and it runs a full SEO audit, then hands you a prioritized action plan. It checks everything a good SEO consultant would:
@@ -149,6 +150,10 @@ Codex SEO runs inside Codex CLI, so the pages and data it analyzes are sent to t
 </details>
 
 **Docs:** [Installation](docs/INSTALLATION.md) · [Commands](docs/COMMANDS.md) · [Architecture](docs/ARCHITECTURE.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) · [Extensions setup](docs/MCP-INTEGRATION.md) · [Security](SECURITY.md) · [Privacy](PRIVACY.md)
+
+## Community
+
+学 AI，上 L 站：[Linux.do](https://linux.do/), the Chinese-speaking community for AI tooling, agents and open source.
 
 ## License and credits
 
