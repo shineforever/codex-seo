@@ -24,11 +24,11 @@ specifically for **Amazon/Bing/Naver/Seznam.cz/Yandex/Yep indexing** and
 
 | Command | Underlying script |
 |---|---|
-| `/seo bing links <url>` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run bing_webmaster.py links <url>` |
-| `/seo bing compare <urlA> <urlB>` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run bing_webmaster.py compare <urlA> <urlB>`; both properties must be registered to the API account |
-| `/seo bing submit <url>` (single URL) | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run indexnow_submit.py --host ... --urls <url>` |
-| `/seo bing submit-batch <file>` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run indexnow_submit.py --host ... --urls-file <file>` |
-| `/seo bing verify-indexnow` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run indexnow_submit.py --host ... --verify-only` |
+| `$seo bing links <url>` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run bing_webmaster.py links <url>` |
+| `$seo bing compare <urlA> <urlB>` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run bing_webmaster.py compare <urlA> <urlB>`; both properties must be registered to the API account |
+| `$seo bing submit <url>` (single URL) | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run indexnow_submit.py --host ... --urls <url>` |
+| `$seo bing submit-batch <file>` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run indexnow_submit.py --host ... --urls-file <file>` |
+| `$seo bing verify-indexnow` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run indexnow_submit.py --host ... --verify-only` |
 
 ## When this skill applies
 

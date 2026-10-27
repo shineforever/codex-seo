@@ -10,7 +10,7 @@ metadata:
 
 # SEO: Universal SEO Analysis Skill
 
-**Invocation:** `/seo $1 $2` where `$1` is the command and `$2` is the URL or argument. In Codex CLI you can also mention the skill directly: `$seo audit <url>`.
+**Invocation:** `$seo $1 $2` where `$1` is the command and `$2` is the URL or argument. In Codex CLI you can also mention the skill directly: `$seo audit <url>`.
 
 **Runtime:** Run bundled Python tools through
 `"${CODEX_SEO_ROOT}/scripts/codex-seo" run <script.py>`. That is the single
@@ -30,41 +30,41 @@ extension is also installable (see "Optional Extensions" below).
 
 | Command | What it does |
 |---------|-------------|
-| `/seo audit <url>` | Full website audit with specialist role passes |
-| `/seo page <url>` | Deep single-page analysis |
-| `/seo sitemap <url or generate>` | Analyze or generate XML sitemaps |
-| `/seo schema <url>` | Detect, validate, and generate Schema.org markup |
-| `/seo images <url or optimize>` | Image SEO: on-page audit, SERP analysis, file optimization |
-| `/seo technical <url>` | Technical SEO audit (9 categories) |
-| `/seo content <url>` | E-E-A-T and content quality analysis |
-| `/seo content-brief <topic or url>` | Generate detailed SEO content brief with target keywords, outline, internal links |
-| `/seo geo <url>` | AI Overviews / Generative Engine Optimization |
-| `/seo agentic [audit\|fix\|lighthouse\|refresh] <url>` | Agent readiness: Lighthouse Agentic Browsing X/N, accessibility tree, AI agent access, llms.txt, Markdown, WebMCP |
-| `/seo plan <business-type>` | Strategic SEO planning |
-| `/seo programmatic [url\|plan]` | Programmatic SEO analysis and planning |
-| `/seo competitor-pages [url\|generate]` | Competitor comparison page generation |
-| `/seo local <url>` | Local SEO analysis (GBP, citations, reviews, map pack) |
-| `/seo maps [command] [args]` | Maps intelligence (geo-grid, GBP audit, reviews, competitors) |
-| `/seo hreflang [url]` | Hreflang/i18n SEO audit and generation |
-| `/seo google [command] [url]` | Google SEO APIs (GSC, PageSpeed, CrUX, Indexing, GA4) |
-| `/seo backlinks <url>` | Backlink profile analysis (free: Moz, Bing, CC; premium: DataForSEO) |
-| `/seo cluster <seed-keyword>` | SERP-based semantic clustering and content architecture |
-| `/seo sxo <url>` | Search Experience Optimization: page-type analysis, user stories, personas |
-| `/seo drift baseline <url>` | Capture SEO baseline for change monitoring |
-| `/seo drift compare <url>` | Compare current state to stored baseline |
-| `/seo drift history <url>` | Show drift history over time |
-| `/seo ecommerce <url>` | E-commerce SEO: product schema, marketplace intelligence |
-| `/seo matomo [command] [args]` | Matomo Reporting API: GA4 alternative or supplement (extension) |
-| `/seo firecrawl [command] <url>` | Full-site crawling and site mapping (extension) |
-| `/seo dataforseo [command]` | Live SEO data via DataForSEO (extension) |
-| `/seo image-gen [use-case] <description>` | AI image generation for SEO assets (extension) |
-| `/seo flow [stage] [url\|topic]` | FLOW framework: evidence-led prompts for Find, Leverage, Optimize, Win, or Local stages |
-| `/seo setup` | Explicitly create or refresh the isolated Python runtime and Chromium |
-| `/seo doctor` | Check runtime readiness without changing the system |
+| `$seo audit <url>` | Full website audit with specialist role passes |
+| `$seo page <url>` | Deep single-page analysis |
+| `$seo sitemap <url or generate>` | Analyze or generate XML sitemaps |
+| `$seo schema <url>` | Detect, validate, and generate Schema.org markup |
+| `$seo images <url or optimize>` | Image SEO: on-page audit, SERP analysis, file optimization |
+| `$seo technical <url>` | Technical SEO audit (9 categories) |
+| `$seo content <url>` | E-E-A-T and content quality analysis |
+| `$seo content-brief <topic or url>` | Generate detailed SEO content brief with target keywords, outline, internal links |
+| `$seo geo <url>` | AI Overviews / Generative Engine Optimization |
+| `$seo agentic [audit\|fix\|lighthouse\|refresh] <url>` | Agent readiness: Lighthouse Agentic Browsing X/N, accessibility tree, AI agent access, llms.txt, Markdown, WebMCP |
+| `$seo plan <business-type>` | Strategic SEO planning |
+| `$seo programmatic [url\|plan]` | Programmatic SEO analysis and planning |
+| `$seo competitor-pages [url\|generate]` | Competitor comparison page generation |
+| `$seo local <url>` | Local SEO analysis (GBP, citations, reviews, map pack) |
+| `$seo maps [command] [args]` | Maps intelligence (geo-grid, GBP audit, reviews, competitors) |
+| `$seo hreflang [url]` | Hreflang/i18n SEO audit and generation |
+| `$seo google [command] [url]` | Google SEO APIs (GSC, PageSpeed, CrUX, Indexing, GA4) |
+| `$seo backlinks <url>` | Backlink profile analysis (free: Moz, Bing, CC; premium: DataForSEO) |
+| `$seo cluster <seed-keyword>` | SERP-based semantic clustering and content architecture |
+| `$seo sxo <url>` | Search Experience Optimization: page-type analysis, user stories, personas |
+| `$seo drift baseline <url>` | Capture SEO baseline for change monitoring |
+| `$seo drift compare <url>` | Compare current state to stored baseline |
+| `$seo drift history <url>` | Show drift history over time |
+| `$seo ecommerce <url>` | E-commerce SEO: product schema, marketplace intelligence |
+| `$seo matomo [command] [args]` | Matomo Reporting API: GA4 alternative or supplement (extension) |
+| `$seo firecrawl [command] <url>` | Full-site crawling and site mapping (extension) |
+| `$seo dataforseo [command]` | Live SEO data via DataForSEO (extension) |
+| `$seo image-gen [use-case] <description>` | AI image generation for SEO assets (extension) |
+| `$seo flow [stage] [url\|topic]` | FLOW framework: evidence-led prompts for Find, Leverage, Optimize, Win, or Local stages |
+| `$seo setup` | Explicitly create or refresh the isolated Python runtime and Chromium |
+| `$seo doctor` | Check runtime readiness without changing the system |
 
 ## Runtime Setup
 
-Run setup only when the user explicitly invokes `/seo setup` or explicitly asks
+Run setup only when the user explicitly invokes `$seo setup` or explicitly asks
 to repair dependencies. Execute
 `"${CODEX_SEO_ROOT}/scripts/codex-seo" setup`, report core and Chromium
 status separately, and do not fall back to global or user package installation.
@@ -72,7 +72,7 @@ For diagnosis, execute
 `"${CODEX_SEO_ROOT}/scripts/codex-seo" doctor --json`; its output
 intentionally omits absolute paths and environment values. If any
 `"${CODEX_SEO_ROOT}/scripts/codex-seo" run` command reports that setup is
-required, suggest `/seo setup` and do not improvise a `pip install`.
+required, suggest `$seo setup` and do not improvise a `pip install`.
 
 ## Orchestration Logic
 
@@ -98,7 +98,7 @@ to the next role:
 13. Collect results and generate unified report with SEO Health Score (0-100)
 14. **Synthesize via the 10-principle framework** (see "Synthesis Methodology" below), walk PERCEIVE → ANALYZE → VALIDATE → ACT before bucketing findings into Critical / High / Medium / Low
 15. Create prioritized action plan with dependency sequencing + falsifiability per recommendation
-16. **Offer PDF report**: "Generate a professional PDF report? Use `/seo google report full`"
+16. **Offer PDF report**: "Generate a professional PDF report? Use `$seo google report full`"
 
 For individual commands, load the relevant sub-skill directly.
 After any analysis command completes, offer to generate a PDF report via `"${CODEX_SEO_ROOT}/scripts/codex-seo" run google_report.py`.
@@ -119,8 +119,8 @@ phases: **PERCEIVE** (observe-external · observe-internal · listen),
 **ANALYZE** (think · connect-lateral · connect-system), **VALIDATE** (feel ·
 accept), **ACT** (create · grow).
 
-Full audits (`/seo audit`, `/seo page`) walk every phase before emitting the
-action plan. Narrower commands (`/seo schema`, `/seo images`, etc.) pass at
+Full audits (`$seo audit`, `$seo page`) walk every phase before emitting the
+action plan. Narrower commands (`$seo schema`, `$seo images`, etc.) pass at
 least THINK + ACCEPT before emitting (sound first principle, surfaced
 falsifiability). The Critical / High / Medium / Low priority buckets are the
 **output** of validation, not a substitute for it.
@@ -137,7 +137,7 @@ Each emitted recommendation should carry:
 
 Detect business type from homepage signals:
 - **SaaS**: pricing page, /features, /integrations, /docs, "free trial", "sign up"
-- **Local Service**: phone number, address, service area, "serving [city]", Google Maps embed --> auto-suggest `/seo local` for deeper analysis
+- **Local Service**: phone number, address, service area, "serving [city]", Google Maps embed --> auto-suggest `$seo local` for deeper analysis
 - **E-commerce**: /products, /collections, /cart, "add to cart", product schema
 - **Publisher**: /blog, /articles, /topics, article schema, author pages, publication dates
 - **Agency**: /case-studies, /portfolio, /industries, "our work", client logos
@@ -228,18 +228,18 @@ The following ship in `extensions/` rather than `skills/` and require a separate
 installer to activate (see each extension's `install.sh`/`install.ps1`):
 
 All optional extensions are reachable through `/seo` subcommands once
-installed: firecrawl, dataforseo, and image-gen, plus `/seo ahrefs`,
-`/seo bing`, `/seo matomo`, `/seo profound`, `/seo seranking`, and
-`/seo unlighthouse`. Each installs as its own sub-skill, so the model also
+installed: firecrawl, dataforseo, and image-gen, plus `$seo ahrefs`,
+`$seo bing`, `$seo matomo`, `$seo profound`, `$seo seranking`, and
+`$seo unlighthouse`. Each installs as its own sub-skill, so the model also
 auto-routes to their descriptions without the `/seo` prefix.
 
 - **seo-firecrawl** -- Full-site crawling and site mapping via Firecrawl MCP. Install
   via `extensions/firecrawl/install.sh` (Unix) or `extensions/firecrawl/install.ps1`
-  (Windows). Once installed, invoke via `/seo firecrawl <command>`.
+  (Windows). Once installed, invoke via `$seo firecrawl <command>`.
 - **seo-matomo** -- Self-hosted or Matomo Cloud Reporting API as a GA4
   alternative or complement. Install via
   `extensions/matomo/install.sh` (Unix) or `extensions/matomo/install.ps1`
-  (Windows). Once installed, invoke via `/seo matomo <command>` or rely
+  (Windows). Once installed, invoke via `$seo matomo <command>` or rely
   on the audit orchestrator to run the seo-matomo role automatically
   when credentials are present.
 

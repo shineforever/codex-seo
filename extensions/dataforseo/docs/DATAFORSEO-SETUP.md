@@ -58,7 +58,7 @@ Replace the username, password, and FIELD_CONFIG_PATH with your actual values.
 After installing, start Codex CLI and run:
 
 ```
-/seo dataforseo serp test query
+$seo dataforseo serp test query
 ```
 
 If you see search results, the extension is working correctly.

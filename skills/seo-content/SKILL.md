@@ -244,7 +244,7 @@ If DataForSEO MCP tools are available, use `kw_data_google_ads_search_volume` fo
 
 ## FLOW Framework Integration
 
-For prompt-guided content optimization, use `/seo flow optimize <url>` and `/seo flow win <url>`: FLOW's optimize and win prompts provide structured E-E-A-T improvement and BOFU conversion workflows.
+For prompt-guided content optimization, use `$seo flow optimize <url>` and `$seo flow win <url>`: FLOW's optimize and win prompts provide structured E-E-A-T improvement and BOFU conversion workflows.
 
 ## Security
 

@@ -196,7 +196,7 @@ Google updated its JavaScript SEO documentation in December 2025 with critical c
 
 ## Agent-Friendly Pages & Agentic Browsing
 
-Agent readiness has its own sub-skill: `/seo agentic <url>` (`seo-agentic`).
+Agent readiness has its own sub-skill: `$seo agentic <url>` (`seo-agentic`).
 It owns the Lighthouse **Agentic Browsing** category (a fraction, X of N, not
 a 0-100 score), the accessibility tree for agents, AI agent access policy,
 llms.txt, Markdown delivery, ai-catalog.json, `/.well-known` discovery files,

@@ -43,7 +43,7 @@ main() {
     }
 
     echo
-    echo "Done. Try: /seo seranking ai-visibility brandname"
+    echo "Done. Try: $seo seranking ai-visibility brandname"
     echo "Full docs: extensions/seranking/docs/SERANKING-SETUP.md"
 }
 

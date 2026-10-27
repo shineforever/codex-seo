@@ -33,6 +33,6 @@ main() {
         echo "  ⚠  Could not persist the API key."
     }
 
-    echo "Done. Try: /seo profound citations brandname"
+    echo "Done. Try: $seo profound citations brandname"
 }
 main "$@"

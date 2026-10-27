@@ -15,7 +15,7 @@ Stores `PROFOUND_API_KEY` in `~/.codex/settings.json` env block, mode 0o600.
 ## Verify
 
 ```
-/seo profound citations "Codex SEO"
+$seo profound citations "Codex SEO"
 ```
 
 ## Uninstall

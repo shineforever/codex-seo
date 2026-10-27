@@ -37,47 +37,46 @@ git clone --depth 1 https://github.com/zhtyyx/codex-seo.git
 powershell -ExecutionPolicy Bypass -File codex-seo\install.ps1
 ```
 
-The installer copies the skills to `~/.agents/skills/` (where Codex discovers user skills), the `/seo` command to `~/.codex/prompts/seo.md`, and creates an isolated Python runtime with a headless browser. Nothing global is touched; uninstall with `bash uninstall.sh`.
+The installer copies the skills to `~/.agents/skills/` (where Codex discovers user skills), and creates an isolated Python runtime with a headless browser. Nothing global is touched; uninstall with `bash uninstall.sh`.
 
 **Your first audit:**
 
 ```bash
 codex                                    # start Codex CLI
 
-/seo audit https://example.com           # full site audit with a prioritized plan
-#   or: $seo audit https://example.com   # mention the skill directly
-/seo page https://example.com/pricing    # one page, in depth
-/seo geo https://example.com             # how ready you are for AI search
-/seo schema https://example.com          # check and generate structured data
+$seo audit https://example.com           # full site audit with a prioritized plan
+$seo page https://example.com/pricing    # one page, in depth
+$seo geo https://example.com             # how ready you are for AI search
+$seo schema https://example.com          # check and generate structured data
 ```
 
 ## Commands
 
-Type `/seo` in Codex CLI to see every command. The main groups:
+Mention a skill with `$` in Codex CLI, e.g. `$seo audit https://example.com` (plain English like "run an SEO audit on ..." works too). The main command groups:
 
 <details>
 <summary><b>Audits and Planning</b></summary>
-<ul><li><code>/seo setup</code>: Create or refresh the isolated Python runtime and Chromium</li><li><code>/seo doctor</code>: Check runtime readiness without changing the system</li><li><code>/seo audit &lt;url&gt;</code>: Full website audit, all specialist roles</li><li><code>/seo page &lt;url&gt;</code>: Deep single-page analysis</li><li><code>/seo plan &lt;type&gt;</code>: Strategic SEO planning (saas, local, ecommerce, publisher, agency)</li></ul>
+<ul><li><code>$seo setup</code>: Create or refresh the isolated Python runtime and Chromium</li><li><code>$seo doctor</code>: Check runtime readiness without changing the system</li><li><code>$seo audit &lt;url&gt;</code>: Full website audit, all specialist roles</li><li><code>$seo page &lt;url&gt;</code>: Deep single-page analysis</li><li><code>$seo plan &lt;type&gt;</code>: Strategic SEO planning (saas, local, ecommerce, publisher, agency)</li></ul>
 </details>
 <details>
 <summary><b>Technical SEO</b></summary>
-<ul><li><code>/seo technical &lt;url&gt;</code>: Technical SEO audit across 9 categories</li><li><code>/seo sitemap &lt;url | generate&gt;</code>: Analyze or generate XML sitemaps</li><li><code>/seo images &lt;url&gt;</code>: Image optimization analysis</li><li><code>/seo hreflang &lt;url&gt;</code>: Hreflang and i18n SEO audit and generation</li><li><code>/seo programmatic &lt;url&gt;</code>: Programmatic SEO analysis and planning</li><li><code>/seo google [command]</code>: Google SEO APIs: GSC, PageSpeed, CrUX, Indexing, GA4, PDF reports</li><li><code>/seo drift baseline | compare | history &lt;url&gt;</code>: SEO drift monitoring with SQLite snapshots</li></ul>
+<ul><li><code>$seo technical &lt;url&gt;</code>: Technical SEO audit across 9 categories</li><li><code>$seo sitemap &lt;url | generate&gt;</code>: Analyze or generate XML sitemaps</li><li><code>$seo images &lt;url&gt;</code>: Image optimization analysis</li><li><code>$seo hreflang &lt;url&gt;</code>: Hreflang and i18n SEO audit and generation</li><li><code>$seo programmatic &lt;url&gt;</code>: Programmatic SEO analysis and planning</li><li><code>$seo google [command]</code>: Google SEO APIs: GSC, PageSpeed, CrUX, Indexing, GA4, PDF reports</li><li><code>$seo drift baseline | compare | history &lt;url&gt;</code>: SEO drift monitoring with SQLite snapshots</li></ul>
 </details>
 <details>
 <summary><b>Content and E-E-A-T</b></summary>
-<ul><li><code>/seo content &lt;url&gt;</code>: E-E-A-T and content quality analysis</li><li><code>/seo content-brief &lt;topic&gt;</code>: Content brief: target keywords, outline, internal links</li><li><code>/seo cluster &lt;keyword&gt;</code>: SERP-based semantic clustering</li><li><code>/seo sxo &lt;url&gt;</code>: Search Experience Optimization: page type, user stories, personas</li><li><code>/seo flow [stage]</code>: FLOW framework prompts (CC BY 4.0, evidence-led)</li><li><code>/seo competitor-pages &lt;url&gt;</code>: Competitor comparison page generation</li></ul>
+<ul><li><code>$seo content &lt;url&gt;</code>: E-E-A-T and content quality analysis</li><li><code>$seo content-brief &lt;topic&gt;</code>: Content brief: target keywords, outline, internal links</li><li><code>$seo cluster &lt;keyword&gt;</code>: SERP-based semantic clustering</li><li><code>$seo sxo &lt;url&gt;</code>: Search Experience Optimization: page type, user stories, personas</li><li><code>$seo flow [stage]</code>: FLOW framework prompts (CC BY 4.0, evidence-led)</li><li><code>$seo competitor-pages &lt;url&gt;</code>: Competitor comparison page generation</li></ul>
 </details>
 <details>
 <summary><b>Schema and AI Search</b></summary>
-<ul><li><code>/seo schema &lt;url&gt;</code>: Detect, validate and generate Schema.org markup</li><li><code>/seo geo &lt;url&gt;</code>: AI Overviews and Generative Engine Optimization</li><li><code>/seo agentic &lt;url&gt;</code>: Agent readiness: Lighthouse Agentic Browsing X/N, AI agent access, llms.txt, Markdown, WebMCP</li></ul>
+<ul><li><code>$seo schema &lt;url&gt;</code>: Detect, validate and generate Schema.org markup</li><li><code>$seo geo &lt;url&gt;</code>: AI Overviews and Generative Engine Optimization</li><li><code>$seo agentic &lt;url&gt;</code>: Agent readiness: Lighthouse Agentic Browsing X/N, AI agent access, llms.txt, Markdown, WebMCP</li></ul>
 </details>
 <details>
 <summary><b>Local, Links, Commerce</b></summary>
-<ul><li><code>/seo local &lt;url&gt;</code>: Local SEO: GBP, citations, reviews, map pack</li><li><code>/seo maps [command]</code>: Maps intelligence: geo-grid, GBP audit, reviews, competitors</li><li><code>/seo backlinks &lt;url&gt;</code>: Backlink profile analysis (Moz, Bing, Common Crawl)</li><li><code>/seo ecommerce &lt;url&gt;</code>: E-commerce SEO and marketplace intelligence</li></ul>
+<ul><li><code>$seo local &lt;url&gt;</code>: Local SEO: GBP, citations, reviews, map pack</li><li><code>$seo maps [command]</code>: Maps intelligence: geo-grid, GBP audit, reviews, competitors</li><li><code>$seo backlinks &lt;url&gt;</code>: Backlink profile analysis (Moz, Bing, Common Crawl)</li><li><code>$seo ecommerce &lt;url&gt;</code>: E-commerce SEO and marketplace intelligence</li></ul>
 </details>
 <details>
 <summary><b>Extensions</b> (optional add-ons)</summary>
-<ul><li><code>/seo image-gen [use-case]</code>: AI image generation for SEO assets</li><li><code>/seo seranking [command]</code>: AI Share-of-Voice across ChatGPT, Gemini, Perplexity, AI Overviews, AI Mode</li><li><code>/seo profound [command]</code>: LLM citation tracking with time-series data</li><li><code>/seo bing [command] &lt;url&gt;</code>: Bing Webmaster Tools + IndexNow URL submission</li><li><code>/seo unlighthouse &lt;url&gt;</code>: Multi-page Lighthouse runner, runs locally</li></ul>
+<ul><li><code>$seo image-gen [use-case]</code>: AI image generation for SEO assets</li><li><code>$seo seranking [command]</code>: AI Share-of-Voice across ChatGPT, Gemini, Perplexity, AI Overviews, AI Mode</li><li><code>$seo profound [command]</code>: LLM citation tracking with time-series data</li><li><code>$seo bing [command] &lt;url&gt;</code>: Bing Webmaster Tools + IndexNow URL submission</li><li><code>$seo unlighthouse &lt;url&gt;</code>: Multi-page Lighthouse runner, runs locally</li></ul>
 </details>
 
 Full reference: [docs/COMMANDS.md](docs/COMMANDS.md).
@@ -88,7 +87,7 @@ Full reference: [docs/COMMANDS.md](docs/COMMANDS.md).
 2. **The specialists line up.** Up to 17 roles audit the site in sequence: technical, content, schema, speed, AI search and more, each writing its findings as it finishes.
 3. **You get a plan, not a pile of warnings.** Findings are scored and sorted into a prioritized action plan. Each recommendation says what it is based on, what it depends on and how you will know it worked.
 
-Reports are saved as Markdown, and `/seo google report` turns them into a polished PDF.
+Reports are saved as Markdown, and `$seo google report` turns them into a polished PDF.
 
 Methodology: [thinking framework](skills/seo/references/thinking-framework.md). Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -111,14 +110,14 @@ Yes. It is MIT licensed, with no per-site pricing and no tracking. This reposito
 <details>
 <summary><b>Do I need API keys?</b></summary>
 
-No. Codex SEO works out of the box. If you want real field data, you can connect free Google APIs (PageSpeed Insights, Chrome UX Report, Search Console and Google Analytics 4) with `/seo google setup`. Your keys stay on your machine.
+No. Codex SEO works out of the box. If you want real field data, you can connect free Google APIs (PageSpeed Insights, Chrome UX Report, Search Console and Google Analytics 4) with `$seo google setup`. Your keys stay on your machine.
 
 </details>
 
 <details>
 <summary><b>How does it help with AI search like Google AI Overviews and ChatGPT?</b></summary>
 
-Google says optimizing for AI search is still SEO, so Codex SEO starts with the basics that AI answers rely on: being indexed, fast and clear. Then `/seo geo` scores how easy your pages are to quote, checks that AI crawlers can reach them and looks at your brand's presence on Wikipedia, Reddit, YouTube and LinkedIn. `/seo agentic` checks how well AI agents can use your site.
+Google says optimizing for AI search is still SEO, so Codex SEO starts with the basics that AI answers rely on: being indexed, fast and clear. Then `$seo geo` scores how easy your pages are to quote, checks that AI crawlers can reach them and looks at your brand's presence on Wikipedia, Reddit, YouTube and LinkedIn. `$seo agentic` checks how well AI agents can use your site.
 
 </details>
 
@@ -139,13 +138,13 @@ Codex SEO runs inside Codex CLI, so the pages and data it analyzes are sent to t
 <details>
 <summary><b>Good to know: requirements, limits and uninstall</b></summary>
 
-**Requirements.** OpenAI Codex CLI and Python 3.11 to 3.14. `/seo setup` installs the headless browser for you.
+**Requirements.** OpenAI Codex CLI and Python 3.11 to 3.14. `$seo setup` installs the headless browser for you.
 
-**Cost of a full audit.** A full `/seo audit` runs 17 specialist role passes in the main session, so it uses more tokens than a single-page check. Everything runs on the model your Codex session is configured with.
+**Cost of a full audit.** A full `$seo audit` runs 17 specialist role passes in the main session, so it uses more tokens than a single-page check. Everything runs on the model your Codex session is configured with.
 
 **Limits.** Without Google API keys, Core Web Vitals are lab estimates and indexing is inferred from the page. Pages that load key content only after scrolling or clicking can give noisy results.
 
-**Uninstall.** `bash uninstall.sh` removes the skills and the `/seo` prompt.
+**Uninstall.** `bash uninstall.sh` removes the skills.
 
 </details>
 

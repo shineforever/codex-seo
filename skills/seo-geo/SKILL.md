@@ -322,7 +322,7 @@ Google added many AI citation/source surfaces across AI Overviews **and** AI Mod
 
 **Controlling AI-feature appearance:** there is **no AI-specific opt-out file**, but since 2026-08-31 every site has a Search Console control, "Search generative AI" (include by default, exclude, or inherit), that controls eligibility for AI Overviews, AI Mode and generative AI features in Discover; it is not a ranking signal, it is separate from `Google-Extended`, and it is not a training control. Beyond that, appearance is governed by standard preview/index directives, `nosnippet`, `data-nosnippet`, `max-snippet`, `noindex` (distinct from the third-party AI-crawler robots controls above). Source: developers.google.com/search/docs/appearance/ai-features
 
-**Search agents (live, not just WebMCP):** Google's "Information Agents" run in the background to monitor topics, plus agentic booking/calling for select categories (announced at I/O 2026 for a summer US rollout; Information Agents start with AI Pro and Ultra subscribers; confirm current availability before promising it), so agent-friendly-page optimization (real interactive elements, accessibility tree, layout stability) now matters for actions, not only citations. Audit that with `/seo agentic` (the `seo-agentic` sub-skill), which also reads Lighthouse's Agentic Browsing fraction.
+**Search agents (live, not just WebMCP):** Google's "Information Agents" run in the background to monitor topics, plus agentic booking/calling for select categories (announced at I/O 2026 for a summer US rollout; Information Agents start with AI Pro and Ultra subscribers; confirm current availability before promising it), so agent-friendly-page optimization (real interactive elements, accessibility tree, layout stability) now matters for actions, not only citations. Audit that with `$seo agentic` (the `seo-agentic` sub-skill), which also reads Lighthouse's Agentic Browsing fraction.
 
 ---
 
@@ -396,7 +396,7 @@ If DataForSEO MCP tools are available, use `ai_optimization_chat_gpt_scraper` to
 
 ## FLOW Framework Integration
 
-For prompt-guided AI content optimization, use `/seo flow optimize <url>`, FLOW's 21 optimize-stage prompts complement GEO's citability and structure analysis with evidence-led AI prompts.
+For prompt-guided AI content optimization, use `$seo flow optimize <url>`, FLOW's 21 optimize-stage prompts complement GEO's citability and structure analysis with evidence-led AI prompts.
 
 ## Security
 

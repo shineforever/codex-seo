@@ -140,7 +140,6 @@ try {
 $SkillsRoot = "$env:USERPROFILE\.agents\skills"
 $SkillDir = "$SkillsRoot\seo"
 $AgentDir = "$SkillsRoot\seo\agents"
-$PromptDir = "$env:USERPROFILE\.codex\prompts"
 # Set this to your fork before distributing. Running install.ps1 from inside
 # a clone of this repository uses the local checkout instead of the network.
 $RepoUrl = if ($env:CODEX_SEO_REPO_URL) { $env:CODEX_SEO_REPO_URL } else { 'https://github.com/zhtyyx/codex-seo' }
@@ -150,7 +149,6 @@ $RepoTag = if ($env:CODEX_SEO_TAG) { $env:CODEX_SEO_TAG } else { 'main' }
 # Create directories
 New-Item -ItemType Directory -Force -Path $SkillDir | Out-Null
 New-Item -ItemType Directory -Force -Path $AgentDir | Out-Null
-New-Item -ItemType Directory -Force -Path $PromptDir | Out-Null
 
 # Source: local checkout when run from inside a clone, else a temp clone.
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -289,11 +287,6 @@ try {
     if (Test-Path $reqFile) {
         Copy-Item -Force $reqFile $installedReqFile
     }
-    # Install the /seo custom prompt
-    $promptSource = Join-Path $SourceDir 'codex-prompts\seo.md'
-    if (Test-Path $promptSource) {
-        Copy-Item -Force $promptSource (Join-Path $PromptDir 'seo.md')
-    }
 
     # Manual installs have no ${CODEX_SEO_ROOT}. Rewrite the canonical
     # launcher token in installed Markdown to the absolute installed path.
@@ -383,7 +376,7 @@ Write-Host "[+] Codex SEO installed successfully!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Usage:" -ForegroundColor Cyan
 Write-Host "  1. Start Codex CLI:  codex"
-Write-Host "  2. Run commands:       /seo audit https://example.com"
+Write-Host "  2. Run commands:       $seo audit https://example.com"
 Write-Host ""
 Write-Host "Skills location: $SkillsRoot" -ForegroundColor Gray
-Write-Host "Custom prompt: $PromptDir\seo.md" -ForegroundColor Gray
+Write-Host "Invoke with: `$seo <command> <url>" -ForegroundColor Gray

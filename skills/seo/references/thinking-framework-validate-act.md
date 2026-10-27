@@ -63,7 +63,7 @@ Stop strategizing. Produce the artifact:
 
 The audit is a snapshot, not a verdict. Build the feedback loop:
 
-- Capture a baseline via `/seo drift baseline <url>` so subsequent
+- Capture a baseline via `$seo drift baseline <url>` so subsequent
   audits can prove what changed.
 - Define one or two leading indicators the user should monitor (CrUX
   trend, GSC impressions for a target cluster, brand-mention growth on

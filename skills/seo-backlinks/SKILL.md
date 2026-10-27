@@ -26,18 +26,18 @@ Run `"${CODEX_SEO_ROOT}/scripts/codex-seo" run backlinks_auth.py --check --json`
 
 If no sources are configured beyond the always-available tier:
 - Still produce a report using Common Crawl domain metrics
-- Suggest: "Run `/seo backlinks setup` to add free Moz and Bing API keys for richer data"
+- Suggest: "Run `$seo backlinks setup` to add free Moz and Bing API keys for richer data"
 
 ## Quick Reference
 
 | Command | Purpose |
 |---------|---------|
-| `/seo backlinks <url>` | Full backlink profile analysis (uses all available sources) |
-| `/seo backlinks gap <url1> <url2>` | Competitor backlink gap analysis |
-| `/seo backlinks toxic <url>` | Toxic link detection and disavow recommendations |
-| `/seo backlinks new <url>` | New and lost backlinks (DataForSEO only) |
-| `/seo backlinks verify <url> --links <file>` | Verify known backlinks still exist |
-| `/seo backlinks setup` | Show setup instructions for free backlink APIs |
+| `$seo backlinks <url>` | Full backlink profile analysis (uses all available sources) |
+| `$seo backlinks gap <url1> <url2>` | Competitor backlink gap analysis |
+| `$seo backlinks toxic <url>` | Toxic link detection and disavow recommendations |
+| `$seo backlinks new <url>` | New and lost backlinks (DataForSEO only) |
+| `$seo backlinks verify <url> --links <file>` | Verify known backlinks still exist |
+| `$seo backlinks setup` | Show setup instructions for free backlink APIs |
 
 ## Analysis Framework
 
@@ -183,7 +183,7 @@ Calculate a 0-100 score. When mixing sources, apply confidence weighting:
   Backlink Health Score: INSUFFICIENT DATA (X/7 factors scored)
   ```
   Show individual factor scores that ARE available with their source and confidence.
-  Recommend: "Configure Moz API (free) for a scoreable profile. Run `/seo backlinks setup`"
+  Recommend: "Configure Moz API (free) for a scoreable profile. Run `$seo backlinks setup`"
 
 ### MUST NOT: score what you did not measure
 
@@ -242,7 +242,7 @@ it passes.
 
 | Error | Cause | Resolution |
 |-------|-------|-----------|
-| No sources configured | No API keys, no DataForSEO | Run `/seo backlinks setup` |
+| No sources configured | No API keys, no DataForSEO | Run `$seo backlinks setup` |
 | Moz rate limit | Free tier: 1 req/10s | Wait 10 seconds, retry. Built into script. |
 | Bing site not verified | Site not verified in Bing | Verify at https://www.bing.com/webmasters |
 | CC download timeout | Large graph file, slow connection | Use `--timeout 180` flag |
@@ -258,7 +258,7 @@ it passes.
    rank-only fallback (confidence: 0.60; single metric, no link counts/anchors)
 5. Always: Common Crawl for domain-level metrics (confidence: 0.50)
 6. Always: Verification crawler for known link checks (confidence: 0.95)
-7. Nothing works? → "Run `/seo backlinks setup` to configure free APIs"
+7. Nothing works? → "Run `$seo backlinks setup` to configure free APIs"
 
 ## Pre-Delivery Review (MANDATORY)
 
@@ -292,7 +292,7 @@ If ANY check fails, fix the finding before presenting. Never present inferred da
 ## Post-Analysis
 
 After completing any backlink analysis command, always offer:
-"Generate a professional PDF report? Use `/seo google report`"
+"Generate a professional PDF report? Use `$seo google report`"
 
 ## Reference Documentation
 

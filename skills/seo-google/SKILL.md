@@ -21,7 +21,7 @@ analysis (existing codex-seo skills) and Google's real-time field data: actual
 Chrome user metrics, real indexation status, search performance, and organic traffic.
 
 All APIs are free. Setup requires a Google Cloud project with API key and/or
-service account -- run `/seo google setup` for step-by-step instructions.
+service account -- run `$seo google setup` for step-by-step instructions.
 
 ## Prerequisites
 
@@ -57,33 +57,33 @@ Always communicate the detected tier before running commands.
 
 | Command | What it does | Tier |
 |---------|-------------|------|
-| `/seo google setup` | Check/configure API credentials | -- |
-| `/seo google pagespeed <url>` | PSI Lighthouse + CrUX field data | 0 |
-| `/seo google crux <url>` | CrUX field data only (p75 metrics) | 0 |
-| `/seo google crux-history <url>` | 25-week CWV trend analysis | 0 |
-| `/seo google gsc <property>` | Search Console: clicks, impressions, CTR, position | 1 |
-| `/seo google inspect <url>` | URL Inspection: index status, canonical, crawl info | 1 |
-| `/seo google inspect-batch <file>` | Batch URL Inspection from file | 1 |
-| `/seo google sitemaps <property>` | GSC sitemap status | 1 |
-| `/seo google index <url>` | Submit URL to Indexing API | 1 |
-| `/seo google index-batch <file>` | Batch submit up to 200 URLs | 1 |
-| `/seo google ga4 [property-id]` | GA4 organic traffic report | 2 |
-| `/seo google ga4-pages [property-id]` | Top organic landing pages | 2 |
-| `/seo google youtube <query>` | YouTube video search (views, likes, duration) | 0 |
-| `/seo google youtube-video <id>` | YouTube video details + top comments | 0 |
-| `/seo google nlp <url-or-text>` | NLP entity extraction + sentiment + classification | 0 |
-| `/seo google entities <url-or-text>` | Entity analysis only (for E-E-A-T) | 0 |
-| `/seo google keywords <seed>` | Keyword ideas from Google Ads Keyword Planner | 3 |
-| `/seo google volume <keywords>` | Search volume lookup from Keyword Planner | 3 |
-| `/seo google entity <query>` | Knowledge Graph entity check | 0 |
-| `/seo google safety <url>` | Web Risk URL safety check | 0 |
-| `/seo google quotas` | Show rate limits for all APIs | -- |
+| `$seo google setup` | Check/configure API credentials | -- |
+| `$seo google pagespeed <url>` | PSI Lighthouse + CrUX field data | 0 |
+| `$seo google crux <url>` | CrUX field data only (p75 metrics) | 0 |
+| `$seo google crux-history <url>` | 25-week CWV trend analysis | 0 |
+| `$seo google gsc <property>` | Search Console: clicks, impressions, CTR, position | 1 |
+| `$seo google inspect <url>` | URL Inspection: index status, canonical, crawl info | 1 |
+| `$seo google inspect-batch <file>` | Batch URL Inspection from file | 1 |
+| `$seo google sitemaps <property>` | GSC sitemap status | 1 |
+| `$seo google index <url>` | Submit URL to Indexing API | 1 |
+| `$seo google index-batch <file>` | Batch submit up to 200 URLs | 1 |
+| `$seo google ga4 [property-id]` | GA4 organic traffic report | 2 |
+| `$seo google ga4-pages [property-id]` | Top organic landing pages | 2 |
+| `$seo google youtube <query>` | YouTube video search (views, likes, duration) | 0 |
+| `$seo google youtube-video <id>` | YouTube video details + top comments | 0 |
+| `$seo google nlp <url-or-text>` | NLP entity extraction + sentiment + classification | 0 |
+| `$seo google entities <url-or-text>` | Entity analysis only (for E-E-A-T) | 0 |
+| `$seo google keywords <seed>` | Keyword ideas from Google Ads Keyword Planner | 3 |
+| `$seo google volume <keywords>` | Search volume lookup from Keyword Planner | 3 |
+| `$seo google entity <query>` | Knowledge Graph entity check | 0 |
+| `$seo google safety <url>` | Web Risk URL safety check | 0 |
+| `$seo google quotas` | Show rate limits for all APIs | -- |
 
 ---
 
 ## PageSpeed + CrUX
 
-### `/seo google pagespeed <url>`
+### `$seo google pagespeed <url>`
 
 Combined Lighthouse lab data + CrUX field data.
 
@@ -95,13 +95,13 @@ Combined Lighthouse lab data + CrUX field data.
 Output merges lab scores (point-in-time Lighthouse) with field data (28-day
 Chrome user metrics). CrUX tries URL-level first, falls back to origin-level.
 
-### `/seo google crux <url>`
+### `$seo google crux <url>`
 
 CrUX field data only (no Lighthouse run). Faster.
 
 **Script:** `"${CODEX_SEO_ROOT}/scripts/codex-seo" run pagespeed_check.py <url> --crux-only --json`
 
-### `/seo google crux-history <url>`
+### `$seo google crux-history <url>`
 
 25-week CrUX History trends. Shows whether CWV metrics are improving, stable, or degrading.
 
@@ -114,7 +114,7 @@ Output includes per-metric trend direction, percentage change, and weekly p75 va
 
 ## Search Console
 
-### `/seo google gsc <property>`
+### `$seo google gsc <property>`
 
 Search Analytics: clicks, impressions, CTR, position for last 28 days.
 
@@ -144,7 +144,7 @@ dimension rows, not the size of every pagination request.
 > substitute for the platform's own analytics. Source:
 > developers.google.com/search/docs/monitor-debug/analyze-social-video-content
 
-### `/seo google inspect <url>`
+### `$seo google inspect <url>`
 
 URL Inspection: real indexation status from Google.
 
@@ -154,13 +154,13 @@ Returns: verdict (PASS/FAIL), coverage state, robots.txt status, indexing state,
 page fetch state, canonical selection, rich results. (`mobileUsabilityResult` is deprecated
 in the API; do not report it as a mobile-usability check.)
 
-### `/seo google inspect-batch <file>`
+### `$seo google inspect-batch <file>`
 
 Batch inspection from a file (one URL per line). Rate limited to 2,000/day per site.
 
 **Script:** `"${CODEX_SEO_ROOT}/scripts/codex-seo" run gsc_inspect.py --batch <file> --json`
 
-### `/seo google sitemaps <property>`
+### `$seo google sitemaps <property>`
 
 List submitted sitemaps with status, errors, warnings. Sitemap contents report
 submitted counts only; URL Inspection API is the indexation truth for whether
@@ -172,7 +172,7 @@ specific URLs are indexed.
 
 ## Indexing API
 
-### `/seo google index <url>`
+### `$seo google index <url>`
 
 Notify Google of a URL update.
 
@@ -182,7 +182,7 @@ Notify Google of a URL update.
 The Indexing API is officially for JobPosting and BroadcastEvent/VideoObject pages.
 Always inform the user of this restriction. Daily quota: 200 publish requests.
 
-### `/seo google index-batch <file>`
+### `$seo google index-batch <file>`
 
 Batch submit URLs from a file. Tracks quota usage.
 
@@ -192,7 +192,7 @@ Batch submit URLs from a file. Tracks quota usage.
 
 ## GA4 Traffic
 
-### `/seo google ga4 [property-id]`
+### `$seo google ga4 [property-id]`
 
 Organic traffic report: daily sessions, users, pageviews, bounce rate, engagement.
 
@@ -202,7 +202,7 @@ Organic traffic report: daily sessions, users, pageviews, bounce rate, engagemen
 
 > **GA4 "AI Assistants" channel (live ~2026-05-13):** GA4 added a native *AI Assistants* Default Channel Group. Sessions referred by a recognized AI assistant get `medium=ai-assistant`. Google's recognized sources are **ChatGPT, Gemini, Claude, Deepseek, Copilot, Grok** and the channel **excludes** Google AI Overviews / AI Mode. **Verify Perplexity separately if needed**; unsupported sources may stay in Referral, and most AI sessions arrive referrer-less and fall into **Direct**, so this channel undercounts AI traffic. Forward-only, no backfill.
 
-### `/seo google ga4-pages [property-id]`
+### `$seo google ga4-pages [property-id]`
 
 Top organic landing pages ranked by sessions.
 
@@ -214,7 +214,7 @@ Top organic landing pages ranked by sessions.
 
 Some third-party studies report a 0.737 correlation between YouTube mentions and AI visibility. Treat it as a methodology-dependent signal. Free, API key only.
 
-### `/seo google youtube <query>`
+### `$seo google youtube <query>`
 
 Search YouTube for videos. Returns title, channel, views, likes, duration.
 
@@ -222,7 +222,7 @@ Search YouTube for videos. Returns title, channel, views, likes, duration.
 **Reference:** `references/youtube-api.md`
 **Quota:** 100 units per search (10,000 units/day free).
 
-### `/seo google youtube-video <video_id>`
+### `$seo google youtube-video <video_id>`
 
 Detailed video info + tags + top 10 comments.
 
@@ -235,7 +235,7 @@ Detailed video info + tags + top 10 comments.
 
 Google NLP entity/sentiment output for internal content-quality checks. Do not treat it as Google E-E-A-T scoring.
 
-### `/seo google nlp <url-or-text>`
+### `$seo google nlp <url-or-text>`
 
 Full NLP analysis: entities, sentiment, content classification.
 
@@ -243,7 +243,7 @@ Full NLP analysis: entities, sentiment, content classification.
 **Reference:** `references/nlp-api.md`
 **Free tier:** 5,000 units/month. Requires billing enabled on GCP project.
 
-### `/seo google entities <url-or-text>`
+### `$seo google entities <url-or-text>`
 
 Entity extraction only (faster, less quota).
 
@@ -255,7 +255,7 @@ Entity extraction only (faster, less quota).
 
 Gold-standard keyword volume data. Requires Google Ads account.
 
-### `/seo google keywords <seed>`
+### `$seo google keywords <seed>`
 
 Generate keyword ideas from seed terms.
 
@@ -263,7 +263,7 @@ Generate keyword ideas from seed terms.
 **Reference:** `references/keyword-planner-api.md`
 **Requires:** Ads developer token + customer ID in config (Tier 3).
 
-### `/seo google volume <keywords>`
+### `$seo google volume <keywords>`
 
 Search volume for specific keywords (comma-separated).
 
@@ -273,20 +273,20 @@ Search volume for specific keywords (comma-separated).
 
 ## Supplementary
 
-### `/seo google entity <query>`
+### `$seo google entity <query>`
 
 Knowledge Graph entity check. Verifies brand presence.
 
 **Reference:** `references/supplementary-apis.md`
 Uses Knowledge Graph Search API with API key.
 
-### `/seo google safety <url>`
+### `$seo google safety <url>`
 
 Web Risk API check for malware/social engineering flags.
 
 **Reference:** `references/supplementary-apis.md`
 
-### `/seo google quotas`
+### `$seo google quotas`
 
 Display rate limits table. Read `references/rate-limits-quotas.md`.
 
@@ -296,7 +296,7 @@ Display rate limits table. Read `references/rate-limits-quotas.md`.
 
 After any analysis command, offer to generate a PDF/HTML report.
 
-### `/seo google report <type>`
+### `$seo google report <type>`
 
 Generate a professional PDF report with charts and analytics.
 
@@ -314,7 +314,7 @@ Generate a professional PDF report with charts and analytics.
 2. Save JSON output to file: `"${CODEX_SEO_ROOT}/scripts/codex-seo" run pagespeed_check.py <url> --json > data.json`
 3. Generate report: `"${CODEX_SEO_ROOT}/scripts/codex-seo" run google_report.py --type cwv-audit --data data.json --domain <domain>`
 
-**Convention:** After completing analysis, suggest: "Generate a report? Use `/seo google report <type>`"
+**Convention:** After completing analysis, suggest: "Generate a report? Use `$seo google report <type>`"
 
 ---
 
@@ -359,7 +359,7 @@ Generate a professional PDF report with charts and analytics.
 
 | Scenario | Action |
 |----------|--------|
-| No credentials configured | Run `/seo google setup`. List Tier 0 commands that work with just an API key. |
+| No credentials configured | Run `$seo google setup`. List Tier 0 commands that work with just an API key. |
 | Service account lacks GSC access | Report error. Instruct: add `client_email` to GSC > Settings > Users > Add. |
 | CrUX data unavailable (404) | Report insufficient Chrome traffic. Suggest PSI lab data as fallback. |
 | GA4 property not found | Report error. Show how to find property ID in GA4 Admin > Property Details. |

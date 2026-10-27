@@ -49,4 +49,4 @@ try {
 Write-Host "Wrote [mcp_servers.ahrefs] to $McpConfigJson"
 
 Write-Host ""
-Write-Host "Done. Open a new Codex CLI session and run /seo ahrefs metrics <url>."
+Write-Host "Done. Open a new Codex CLI session and run $seo ahrefs metrics <url>."

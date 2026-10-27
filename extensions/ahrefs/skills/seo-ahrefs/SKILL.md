@@ -26,10 +26,10 @@ provide the install command above.
 
 | Command | Action |
 |---|---|
-| `/seo ahrefs metrics <url>` | Domain / URL rating, referring domain count, organic traffic estimate |
-| `/seo ahrefs backlinks <url>` | Top referring domains, anchor distribution, follow/nofollow ratio |
-| `/seo ahrefs organic <url>` | Organic keywords, ranking distribution, traffic by country |
-| `/seo ahrefs content <topic>` | Content Explorer top results, social shares, referring domains |
+| `$seo ahrefs metrics <url>` | Domain / URL rating, referring domain count, organic traffic estimate |
+| `$seo ahrefs backlinks <url>` | Top referring domains, anchor distribution, follow/nofollow ratio |
+| `$seo ahrefs organic <url>` | Organic keywords, ranking distribution, traffic by country |
+| `$seo ahrefs content <topic>` | Content Explorer top results, social shares, referring domains |
 
 ## Output conventions
 

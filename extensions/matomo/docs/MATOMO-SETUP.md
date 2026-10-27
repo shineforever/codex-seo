@@ -6,10 +6,10 @@
    countries, referrers, and search keywords via
    `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py`.
 2. **Live credential probe** via `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_auth.py --check`
-   used by the `/seo matomo` skill and by the audit orchestrator to
+   used by the `$seo matomo` skill and by the audit orchestrator to
    decide whether to spawn the `seo-matomo` agent.
 3. A unified `seo-matomo` skill that routes the right command at the
-   right script and an `seo-matomo` agent for `/seo audit`.
+   right script and an `seo-matomo` agent for `$seo audit`.
 
 ## Install
 
@@ -107,7 +107,7 @@ hints.
 
 ## Audit integration
 
-When `matomo_auth.py --check` succeeds, the `/seo audit` orchestrator
+When `matomo_auth.py --check` succeeds, the `$seo audit` orchestrator
 spawns the `seo-matomo` agent alongside the existing specialists. The
 agent writes `output_dir/findings/matomo.md` with organic traffic trend,
 top landing pages, device / country split, and referrer breakdown. It

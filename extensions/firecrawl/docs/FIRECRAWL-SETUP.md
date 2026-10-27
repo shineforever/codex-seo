@@ -33,7 +33,7 @@ env = { FIRECRAWL_API_KEY = "fc-your-api-key-here" }
 Start Codex CLI and try:
 
 ```
-/seo firecrawl map https://example.com
+$seo firecrawl map https://example.com
 ```
 
 You should see a list of discovered URLs. If you get a "tool not available" error, restart Codex CLI to reload MCP servers.

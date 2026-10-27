@@ -22,9 +22,9 @@ bash codex-seo/install.sh
 
 The installer copies the skills to `~/.agents/skills/` and the `/seo` custom
 prompt to `~/.codex/prompts/seo.md`, then provisions an isolated runtime.
-`/seo setup` is an explicit, one-time provisioning step that writes the virtual
+`$seo setup` is an explicit, one-time provisioning step that writes the virtual
 environment and browser only to the installed skill directory. Use
-`/seo doctor` for a read-only check.
+`$seo doctor` for a read-only check.
 
 ### Quick Install (Windows, PowerShell)
 

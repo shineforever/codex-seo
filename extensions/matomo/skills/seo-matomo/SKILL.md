@@ -24,13 +24,13 @@ against Matomo Cloud and self-hosted instances.
 
 | Command | Underlying script |
 |---|---|
-| `/seo matomo check` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_auth.py --check` |
-| `/seo matomo organic [site-id]` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py organic --site-id <id>` |
-| `/seo matomo top-pages` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py top-pages` |
-| `/seo matomo device` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py device` |
-| `/seo matomo country` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py country` |
-| `/seo matomo referrers` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py referrers` |
-| `/seo matomo keywords` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py keywords` |
+| `$seo matomo check` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_auth.py --check` |
+| `$seo matomo organic [site-id]` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py organic --site-id <id>` |
+| `$seo matomo top-pages` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py top-pages` |
+| `$seo matomo device` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py device` |
+| `$seo matomo country` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py country` |
+| `$seo matomo referrers` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py referrers` |
+| `$seo matomo keywords` | `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_report.py keywords` |
 
 All commands accept `--days` (default 28), `--limit`, `--site-id`, and
 `--json`. The site ID falls back to `MATOMO_SITE_ID` from settings.
@@ -54,7 +54,7 @@ All commands accept `--days` (default 28), `--limit`, `--site-id`, and
   performance metrics.
 - For AI Overview / GEO citability work, route to `seo-geo`. Matomo
   offers no LLM-specific signals.
-- During `/seo audit`, the orchestrator spawns the `seo-matomo` agent
+- During `$seo audit`, the orchestrator spawns the `seo-matomo` agent
   (analogous to `seo-google`) whenever `"${CODEX_SEO_ROOT}/scripts/codex-seo" run matomo_auth.py
   --check` succeeds. Both agents can be active simultaneously when the
   user has both GA4 and Matomo configured.

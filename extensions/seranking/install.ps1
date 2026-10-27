@@ -31,4 +31,4 @@ try {
     # A native command's non-zero exit does not throw, even with Stop.
     if ($LASTEXITCODE -ne 0) { throw "Nothing was saved (python exited $LASTEXITCODE). See the message above." }
 } finally { Remove-Item Env:SERANKING_API_KEY -ErrorAction SilentlyContinue }
-Write-Host "Done. Try: /seo seranking ai-visibility brandname"
+Write-Host "Done. Try: $seo seranking ai-visibility brandname"

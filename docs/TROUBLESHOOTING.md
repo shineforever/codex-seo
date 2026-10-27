@@ -50,8 +50,8 @@ curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/install.sh | 
 Dependencies belong in the managed runtime. For a plugin install, run:
 
 ```bash
-/seo doctor
-/seo setup
+$seo doctor
+$seo setup
 ```
 
 For a manual install, run:
@@ -87,7 +87,7 @@ curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/requirements.
 1. Install Python from [python.org](https://python.org) and check "Add to PATH"
 2. Rerun `install.ps1`. It uses `CODEX_SEO_PYTHON` when set, otherwise the first of `py -3`, `python3` and `python` that is Python 3.11 to 3.14, otherwise the newest of `py -3.14` down to `py -3.11`
 3. If `py -3` is a newer Python that Codex SEO does not support yet (such as 3.15), install 3.14 alongside it, or set `CODEX_SEO_PYTHON` to a supported `python.exe`
-4. Run `/seo doctor` after installation
+4. Run `$seo doctor` after installation
 
 ---
 
@@ -98,8 +98,8 @@ curl -fsSL https://raw.githubusercontent.com/zhtyyx/codex-seo/main/requirements.
 **Solution:** rerun managed setup so the browser is installed through the same
 interpreter and persistent browser directory:
 ```bash
-/seo setup
-/seo doctor
+$seo setup
+$seo doctor
 ```
 
 ---
@@ -175,7 +175,7 @@ cp /path/to/codex-seo/agents/*.md ~/.agents/skills/seo/agents/
 
 1. Audit crawls up to 500 pages: large sites take time
 2. Subagents run in parallel to speed up analysis
-3. For faster checks, use `/seo page` on specific URLs
+3. For faster checks, use `$seo page` on specific URLs
 4. Check if site has slow response times
 
 ---

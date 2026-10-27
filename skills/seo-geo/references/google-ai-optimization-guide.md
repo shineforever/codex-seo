@@ -115,7 +115,7 @@ The AI optimization guide pivots near the end to **AI agents**, not just
 summarizers. Agents interact with sites through three channels: screenshots
 plus a vision model, raw HTML/DOM, and the browser accessibility tree.
 
-Full audit criteria: `${CODEX_SEO_ROOT}/skills/seo-agentic/references/agent-friendly-pages.md` (run `/seo agentic`).
+Full audit criteria: `${CODEX_SEO_ROOT}/skills/seo-agentic/references/agent-friendly-pages.md` (run `$seo agentic`).
 
 The guide itself does not mention WebMCP (checked 2026-09-23); WebMCP status,
 consumers and safe patterns are tracked separately in

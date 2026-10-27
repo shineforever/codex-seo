@@ -5,7 +5,6 @@
 #   ~/.agents/skills/<skill>/     every skill from skills/ (Codex discovers these)
 #   ~/.agents/skills/seo/         hub skill also carries scripts/, agents/,
 #                                 schema/, data/, requirements.txt
-#   ~/.codex/prompts/seo.md       /seo slash command
 #
 # Override the source with CODEX_SEO_REPO_URL / CODEX_SEO_TAG.
 set -euo pipefail
@@ -13,7 +12,6 @@ set -euo pipefail
 main() {
     SKILLS_ROOT="${HOME}/.agents/skills"
     SKILL_DIR="${SKILLS_ROOT}/seo"
-    PROMPT_DIR="${HOME}/.codex/prompts"
     # Set this to your fork before distributing. The default points at a
     # placeholder; running install.sh from inside a clone of this repository
     # uses the local checkout instead of the network.
@@ -29,7 +27,6 @@ main() {
     command -v git >/dev/null 2>&1 || { echo "✗ Git is required but not installed."; exit 1; }
 
     mkdir -p "${SKILLS_ROOT}"
-    mkdir -p "${PROMPT_DIR}"
 
     # Use the local checkout when run from inside a clone; otherwise fetch.
     if [ -f "$(dirname -- "$0")/skills/seo/SKILL.md" ]; then
@@ -76,9 +73,6 @@ main() {
         done
     done
 
-    echo "→ Installing /seo custom prompt..."
-    cp "${SRC_DIR}/codex-prompts/seo.md" "${PROMPT_DIR}/seo.md"
-
     # Installed skills have no ${CODEX_SEO_ROOT}; rewrite the canonical
     # launcher token to the absolute installed path. The substitution is
     # idempotent: it consumes the token, so a second pass matches nothing.
@@ -117,11 +111,10 @@ main() {
     echo ""
     echo "Usage:"
     echo "  1. Start Codex CLI:   codex"
-    echo "  2. Run commands:      /seo audit https://example.com"
-    echo "     or mention a skill: \$seo audit https://example.com"
+    echo "  2. Mention a skill:   \$seo audit https://example.com"
     echo ""
     echo "Skills location:    ${SKILLS_ROOT}"
-    echo "Custom prompt:      ${PROMPT_DIR}/seo.md"
+    echo "Invoke with:        \$seo <command> <url>"
     echo "Inspect remote scripts before piping them to bash."
 }
 

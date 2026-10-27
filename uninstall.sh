@@ -8,7 +8,6 @@
 # additions are cleaned up automatically without releasing a new
 # uninstaller.
 #
-# The /seo custom prompt (~/.codex/prompts/seo.md) is removed too.
 # MCP servers registered by extensions stay in ~/.codex/config.toml;
 # remove their [mcp_servers.*] blocks manually if desired.
 set -euo pipefail
@@ -52,11 +51,6 @@ main() {
 
     shopt -u nullglob
 
-    # Remove the /seo custom prompt
-    if [ -f "${HOME}/.codex/prompts/seo.md" ]; then
-        rm -f "${HOME}/.codex/prompts/seo.md"
-        echo "  Removed: ${HOME}/.codex/prompts/seo.md"
-    fi
 
     if [ "${removed_skills}" -eq 0 ] && [ "${removed_agents}" -eq 0 ]; then
         echo "  Nothing to remove. Codex SEO does not appear to be installed."

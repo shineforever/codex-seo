@@ -8,7 +8,6 @@
 # additions are cleaned up automatically without releasing a new
 # uninstaller.
 #
-# The /seo custom prompt (~/.codex/prompts/seo.md) is removed too.
 
 $ErrorActionPreference = "Stop"
 
@@ -43,12 +42,6 @@ function Main {
         }
     }
 
-    # Remove the /seo custom prompt
-    $PromptFile = Join-Path (Join-Path (Join-Path $env:USERPROFILE ".codex") "prompts") "seo.md"
-    if (Test-Path $PromptFile -PathType Leaf) {
-        Remove-Item -Force $PromptFile
-        Write-Color Green "  Removed: $PromptFile"
-    }
 
     # Remove every seo-*.md agent file
     if (Test-Path $AgentDir -PathType Container) {

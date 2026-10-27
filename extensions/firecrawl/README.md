@@ -28,19 +28,19 @@ The installer will prompt for your Firecrawl API key and configure the MCP serve
 
 | Command | Purpose | Credits |
 |---------|---------|---------|
-| `/seo firecrawl crawl <url>` | Full-site crawl with content extraction | 1 per page |
-| `/seo firecrawl map <url>` | Discover site structure (URLs only) | 0.5 per URL |
-| `/seo firecrawl scrape <url>` | Single-page deep scrape with JS rendering | 1 |
-| `/seo firecrawl search <query> <url>` | Search within a site | 1 per result |
+| `$seo firecrawl crawl <url>` | Full-site crawl with content extraction | 1 per page |
+| `$seo firecrawl map <url>` | Discover site structure (URLs only) | 0.5 per URL |
+| `$seo firecrawl scrape <url>` | Single-page deep scrape with JS rendering | 1 |
+| `$seo firecrawl search <query> <url>` | Search within a site | 1 per result |
 
 ## Integration with Codex SEO
 
 When installed, other Codex SEO skills automatically leverage Firecrawl:
 
-- **`/seo audit`**: Uses `map` to discover all pages, then `crawl` for deep analysis
-- **`/seo technical`**: Broken link detection across entire site
-- **`/seo sitemap`**: Compare XML sitemap vs actual crawlable pages
-- **`/seo content`**: Thin content detection at scale
+- **`$seo audit`**: Uses `map` to discover all pages, then `crawl` for deep analysis
+- **`$seo technical`**: Broken link detection across entire site
+- **`$seo sitemap`**: Compare XML sitemap vs actual crawlable pages
+- **`$seo content`**: Thin content detection at scale
 
 ## Cost
 
