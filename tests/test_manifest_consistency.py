@@ -77,14 +77,17 @@ def test_agent_count_claims_match_disk():
 
 
 def test_canonical_phrasing_in_user_visible_docs():
-    """README and AGENTS.md must reference the canonical sub-skills count."""
+    """READMEs and AGENTS.md must reference the canonical sub-skills count."""
     canonical_count = _count_skill_dirs()
-    target_phrase = f"{canonical_count} sub-skills"
-    for filename in ["README.md", "AGENTS.md"]:
+    for filename, phrase in [
+        ("README.md", f"{canonical_count} 个子技能"),
+        ("README.en.md", f"{canonical_count} sub-skills"),
+        ("AGENTS.md", f"{canonical_count} sub-skills"),
+    ]:
         path = REPO_ROOT / filename
         head = "\n".join(path.read_text(encoding="utf-8").splitlines()[:120])
-        assert target_phrase in head, (
-            f"{filename} does not reference '{target_phrase}' in its first "
+        assert phrase in head, (
+            f"{filename} does not reference '{phrase}' in its first "
             f"120 lines. Update it to match the skills/ count on disk."
         )
 
